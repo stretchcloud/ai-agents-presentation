@@ -11,8 +11,6 @@
 
 This repository contains a complete **29-slide presentation** designed specifically for software developers who want to understand, implement, and deploy AI agents in production environments. The presentation covers everything from basic concepts to advanced architectural patterns and real-world deployment strategies.
 
-### 🎯 **[View Live Demo →](https://xwfrvesv.manus.space)**
-
 ## 📋 What's Included
 
 ### 📊 **Comprehensive Coverage**
