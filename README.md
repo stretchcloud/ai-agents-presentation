@@ -11,6 +11,8 @@
 
 This repository contains a complete **29-slide presentation** designed specifically for software developers who want to understand, implement, and deploy AI agents in production environments. The presentation covers everything from basic concepts to advanced architectural patterns and real-world deployment strategies.
 
+### 🎯 **[View Live Demo →](https://stretchcloud.github.io/ai-agents-presentation/)**
+
 ## 📋 What's Included
 
 ### 📊 **Comprehensive Coverage**
@@ -117,7 +119,7 @@ ai-agents-presentation/
 ## 🚀 Quick Start
 
 ### Option 1: View Online
-Simply visit the **[Live Demo](https://xwfrvesv.manus.space)** to access the complete presentation immediately.
+Simply visit the **[Live Demo](https://stretchcloud.github.io/ai-agents-presentation/)** to access the complete presentation immediately.
 
 ### Option 2: Run Locally
 
@@ -227,7 +229,7 @@ We welcome contributions to improve this presentation! Here's how you can help:
 ### **Development Setup**
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/ai-agents-presentation.git
+git clone https://github.com/stretchcloud/ai-agents-presentation.git
 cd ai-agents-presentation
 
 # Create a new branch
@@ -257,8 +259,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues:** [GitHub Issues](https://github.com/yourusername/ai-agents-presentation/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/yourusername/ai-agents-presentation/discussions)
-- **Email:** your.email@example.com
-- **Twitter:** [@yourusername](https://twitter.com/yourusername)
+- **Twitter:** [@stretchcloud](https://twitter.com/stretchcloud)
 
 ## 🌟 Show Your Support
 
@@ -273,7 +274,7 @@ If this presentation helped you learn about AI agents, please consider:
 
 <div align="center">
 
-**[🚀 View Live Demo](https://xwfrvesv.manus.space)** | **[📖 Browse Slides](slides/)** | **[🤝 Contribute](CONTRIBUTING.md)**
+**[🚀 View Live Demo](https://stretchcloud.github.io/ai-agents-presentation/)** | **[📖 Browse Slides](slides/)** | **[🤝 Contribute](CONTRIBUTING.md)**
 
 Made with ❤️ for the developer community
 
