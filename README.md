@@ -1,7 +1,7 @@
 # 🤖 AI Agents: Complete Developer Guide
 
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/ai-agents-presentation?style=social)](https://github.com/yourusername/ai-agents-presentation/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/yourusername/ai-agents-presentation?style=social)](https://github.com/yourusername/ai-agents-presentation/network/members)
+[![GitHub stars](https://img.shields.io/github/stars/stretchcloud/ai-agents-presentation?style=social)](https://github.com/stretchcloud/ai-agents-presentation/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/stretchcloud/ai-agents-presentation?style=social)](https://github.com/stretchcloud/ai-agents-presentation/network/members)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://xwfrvesv.manus.space)
 
