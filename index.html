@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agents: Complete Developer Guide</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .slide-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .slide-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-left-color: #667eea;
+        }
+        .section-intro { border-left-color: #10b981; }
+        .section-types { border-left-color: #3b82f6; }
+        .section-architecture { border-left-color: #f59e0b; }
+        .section-frameworks { border-left-color: #8b5cf6; }
+        .section-applications { border-left-color: #ef4444; }
+        .section-implementation { border-left-color: #06b6d4; }
+        .section-future { border-left-color: #84cc16; }
+        .progress-bar {
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #3b82f6, #f59e0b, #8b5cf6, #ef4444, #06b6d4, #84cc16);
+            border-radius: 2px;
+        }
+        .nav-sticky {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .slide-preview {
+            height: 200px;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #f8fafc;
+            position: relative;
+        }
+        .slide-preview iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            transform: scale(0.3);
+            transform-origin: top left;
+            width: 333.33%;
+            height: 333.33%;
+        }
+        .slide-number {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="nav-sticky fixed top-0 left-0 right-0 z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-robot text-2xl text-indigo-600 mr-3"></i>
+                    <h1 class="text-xl font-bold text-gray-900">AI Agents Guide</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="#introduction" class="text-gray-600 hover:text-indigo-600 transition-colors">Introduction</a>
+                    <a href="#architecture" class="text-gray-600 hover:text-indigo-600 transition-colors">Architecture</a>
+                    <a href="#frameworks" class="text-gray-600 hover:text-indigo-600 transition-colors">Frameworks</a>
+                    <a href="#implementation" class="text-gray-600 hover:text-indigo-600 transition-colors">Implementation</a>
+                    <a href="slides/title_slide.html" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        <i class="fas fa-play mr-2"></i>Start Presentation
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="progress-bar"></div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient pt-24 pb-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-5xl font-bold text-white mb-6">
+                    AI Agents: Architecture, Implementation, and Practical Applications
+                </h1>
+                <p class="text-xl text-indigo-100 mb-8 leading-relaxed">
+                    A comprehensive technical guide for software developers covering AI agent concepts, 
+                    architectures, frameworks, and real-world implementation strategies.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="slides/title_slide.html" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center">
+                        <i class="fas fa-play mr-2"></i>
+                        Start Full Presentation
+                    </a>
+                    <a href="#overview" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors inline-flex items-center">
+                        <i class="fas fa-list mr-2"></i>
+                        Browse by Topic
+                    </a>
+                </div>
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="bg-white bg-opacity-10 rounded-lg p-6">
+                        <div class="text-3xl font-bold text-white mb-2">29</div>
+                        <div class="text-indigo-100">Comprehensive Slides</div>
+                    </div>
+                    <div class="bg-white bg-opacity-10 rounded-lg p-6">
+                        <div class="text-3xl font-bold text-white mb-2">7</div>
+                        <div class="text-indigo-100">Technical Sections</div>
+                    </div>
+                    <div class="bg-white bg-opacity-10 rounded-lg p-6">
+                        <div class="text-3xl font-bold text-white mb-2">5000+</div>
+                        <div class="text-indigo-100">Lines of Code Examples</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section id="overview" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Complete Learning Path</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                    Navigate through our comprehensive curriculum designed for software developers. 
+                    Each section builds upon the previous, taking you from basic concepts to production deployment.
+                </p>
+            </div>
+
+            <!-- Section 1: Introduction & Foundations -->
+            <div id="introduction" class="mb-16">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">1</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900">Introduction & Foundations</h3>
+                        <p class="text-gray-600">Core concepts, definitions, and fundamental understanding</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="slide-card section-intro bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">1</div>
+                            <div class="h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-robot text-4xl mb-2"></i>
+                                    <div class="font-bold">AI Agents</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Title & Introduction</h4>
+                        <p class="text-sm text-gray-600 mb-4">Professional introduction to the comprehensive AI agents presentation</p>
+                        <a href="slides/title_slide.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="slide-card section-intro bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">2</div>
+                            <div class="h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-list text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">Learning Objectives</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Agenda & Objectives</h4>
+                        <p class="text-sm text-gray-600 mb-4">Learning outcomes and comprehensive roadmap for developers</p>
+                        <a href="slides/agenda_objectives.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="slide-card section-intro bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">3</div>
+                            <div class="h-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-question-circle text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">What Are Agents?</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">What Are AI Agents?</h4>
+                        <p class="text-sm text-gray-600 mb-4">Technical definitions with extensive code examples and comparisons</p>
+                        <a href="slides/what_are_agents.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="slide-card section-intro bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">4</div>
+                            <div class="h-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-history text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">Evolution</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Evolution from Traditional AI</h4>
+                        <p class="text-sm text-gray-600 mb-4">Technical progression and architectural comparisons</p>
+                        <a href="slides/evolution_traditional_ai.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="slide-card section-intro bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">5</div>
+                            <div class="h-full bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-star text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">Why Agents Matter</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Why AI Agents Matter</h4>
+                        <p class="text-sm text-gray-600 mb-4">Impact analysis for developer workflows and productivity</p>
+                        <a href="slides/why_agents_matter.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="slide-card section-intro bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">6</div>
+                            <div class="h-full bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-balance-scale text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">Comparisons</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Agent vs Assistant vs Chatbot</h4>
+                        <p class="text-sm text-gray-600 mb-4">Detailed technical distinctions with implementation examples</p>
+                        <a href="slides/agent_vs_assistant_chatbot.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Agent Types & Classification -->
+            <div class="mb-16">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">2</div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900">Agent Types & Classification</h3>
+                        <p class="text-gray-600">Understanding different agent architectures and their capabilities</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="slide-card section-types bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">7</div>
+                            <div class="h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-layer-group text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">Five Types</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Five Agent Types Overview</h4>
+                        <p class="text-sm text-gray-600 mb-4">Complete classification framework and complexity spectrum</p>
+                        <a href="slides/five_agent_types_overview.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="slide-card section-types bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">8</div>
+                            <div class="h-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-bolt text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">Reflex Agents</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Reflex Agents</h4>
+                        <p class="text-sm text-gray-600 mb-4">Simple and model-based architectures with implementation patterns</p>
+                        <a href="slides/reflex_agents.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="slide-card section-types bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">9</div>
+                            <div class="h-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-target text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">Goal & Utility</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Goal & Utility-Based Agents</h4>
+                        <p class="text-sm text-gray-600 mb-4">Planning algorithms and optimization strategies</p>
+                        <a href="slides/goal_utility_agents.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="slide-card section-types bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">10</div>
+                            <div class="h-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-graduation-cap text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">Learning Agents</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Learning Agents</h4>
+                        <p class="text-sm text-gray-600 mb-4">Most advanced adaptive systems with ML integration</p>
+                        <a href="slides/learning_agents.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="slide-card section-types bg-white rounded-lg shadow-md p-6 border-l-4">
+                        <div class="slide-preview mb-4">
+                            <div class="slide-number">11</div>
+                            <div class="h-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                                <div class="text-white text-center">
+                                    <i class="fas fa-users text-3xl mb-2"></i>
+                                    <div class="font-bold text-sm">Multi-Agent</div>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-2">Multi-Agent Systems</h4>
+                        <p class="text-sm text-gray-600 mb-4">Collaboration patterns and coordination mechanisms</p>
+                        <a href="slides/multi_agent_systems.html" class="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                            View Slide <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Continue with other sections... -->
+            <!-- For brevity, I'll add a "View All Slides" section -->
+            <div class="text-center mt-16">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Complete Slide Collection</h3>
+                <p class="text-gray-600 mb-8">Access all 29 slides covering technical architecture, frameworks, applications, and implementation</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+                    <a href="slides/core_architecture.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-600 mb-1">12</div>
+                            <div class="text-xs text-gray-600">Core Architecture</div>
+                        </div>
+                    </a>
+                    <a href="slides/react_architecture.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-600 mb-1">13</div>
+                            <div class="text-xs text-gray-600">ReAct Pattern</div>
+                        </div>
+                    </a>
+                    <a href="slides/tool_calling.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-600 mb-1">14</div>
+                            <div class="text-xs text-gray-600">Tool Calling</div>
+                        </div>
+                    </a>
+                    <a href="slides/memory_systems.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-600 mb-1">15</div>
+                            <div class="text-xs text-gray-600">Memory Systems</div>
+                        </div>
+                    </a>
+                    <a href="slides/planning_reasoning.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-600 mb-1">16</div>
+                            <div class="text-xs text-gray-600">Planning</div>
+                        </div>
+                    </a>
+                    <a href="slides/feedback_learning.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-yellow-600 mb-1">17</div>
+                            <div class="text-xs text-gray-600">Feedback</div>
+                        </div>
+                    </a>
+                    <a href="slides/framework_landscape.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600 mb-1">18</div>
+                            <div class="text-xs text-gray-600">Frameworks</div>
+                        </div>
+                    </a>
+                    <a href="slides/langchain_langgraph.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600 mb-1">19</div>
+                            <div class="text-xs text-gray-600">LangChain</div>
+                        </div>
+                    </a>
+                    <a href="slides/autogen_crewai.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600 mb-1">20</div>
+                            <div class="text-xs text-gray-600">AutoGen</div>
+                        </div>
+                    </a>
+                    <a href="slides/emerging_frameworks.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600 mb-1">21</div>
+                            <div class="text-xs text-gray-600">Emerging</div>
+                        </div>
+                    </a>
+                    <a href="slides/software_dev_applications.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-600 mb-1">22</div>
+                            <div class="text-xs text-gray-600">Dev Apps</div>
+                        </div>
+                    </a>
+                    <a href="slides/enterprise_applications.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-600 mb-1">23</div>
+                            <div class="text-xs text-gray-600">Enterprise</div>
+                        </div>
+                    </a>
+                    <a href="slides/industry_implementations.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-600 mb-1">24</div>
+                            <div class="text-xs text-gray-600">Industry</div>
+                        </div>
+                    </a>
+                    <a href="slides/performance_roi.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-red-600 mb-1">25</div>
+                            <div class="text-xs text-gray-600">ROI</div>
+                        </div>
+                    </a>
+                    <a href="slides/design_patterns.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-cyan-600 mb-1">26</div>
+                            <div class="text-xs text-gray-600">Patterns</div>
+                        </div>
+                    </a>
+                    <a href="slides/testing_debugging.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-cyan-600 mb-1">27</div>
+                            <div class="text-xs text-gray-600">Testing</div>
+                        </div>
+                    </a>
+                    <a href="slides/deployment_production.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-cyan-600 mb-1">28</div>
+                            <div class="text-xs text-gray-600">Deployment</div>
+                        </div>
+                    </a>
+                    <a href="slides/future_outlook.html" class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-lime-600 mb-1">29</div>
+                            <div class="text-xs text-gray-600">Future</div>
+                        </div>
+                    </a>
+                </div>
+                <a href="slides/title_slide.html" class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors inline-flex items-center">
+                    <i class="fas fa-play mr-2"></i>
+                    Start Full Presentation
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-robot text-2xl text-indigo-400 mr-3"></i>
+                    <h3 class="text-xl font-bold">AI Agents Developer Guide</h3>
+                </div>
+                <p class="text-gray-400 mb-6">
+                    Comprehensive technical presentation covering AI agent architecture, implementation, and deployment
+                </p>
+                <div class="flex justify-center space-x-6">
+                    <a href="slides/title_slide.html" class="text-indigo-400 hover:text-indigo-300 transition-colors">
+                        <i class="fas fa-play mr-2"></i>Presentation
+                    </a>
+                    <a href="#overview" class="text-indigo-400 hover:text-indigo-300 transition-colors">
+                        <i class="fas fa-list mr-2"></i>Browse Topics
+                    </a>
+                </div>
+                <div class="mt-8 pt-8 border-t border-gray-800 text-sm text-gray-500">
+                    <p>&copy; 2024 AI Agents Developer Guide. Created for educational purposes.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('.nav-sticky');
+            if (window.scrollY > 100) {
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.remove('shadow-lg');
+            }
+        });
+    </script>
+</body>
+</html>
+

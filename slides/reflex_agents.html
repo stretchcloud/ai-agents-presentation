@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #ef4444;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .agent-types-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .agent-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+        }
+        .reflex-card { border-top-color: #ef4444; }
+        .model-card { border-top-color: #f59e0b; }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+            font-size: 20px;
+        }
+        .reflex-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .model-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .card-description {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .architecture-diagram {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+        }
+        .reflex-diagram { border-left-color: #ef4444; }
+        .model-diagram { border-left-color: #f59e0b; }
+        
+        .characteristics-list {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0;
+        }
+        .characteristic-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #475569;
+        }
+        .char-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .check-icon { color: #10b981; }
+        .x-icon { color: #ef4444; }
+        
+        .code-example {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+            margin-top: 12px;
+        }
+        .comparison-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        .table-header {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #1e293b;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .table-cell {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+        .use-cases-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 20px;
+        }
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .use-case-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .use-case-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #06b6d4;
+        }
+        .use-case-desc {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Simple Reflex and Model-Based Reflex Agents</h1>
+            <p class="text-lg text-gray-600">Foundation Agent Types: Architecture and Implementation</p>
+        </div>
+        
+        <div class="agent-types-grid">
+            <div class="agent-card reflex-card">
+                <div class="card-header">
+                    <div class="card-icon reflex-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="card-title">Simple Reflex Agents</div>
+                </div>
+                <div class="card-description">
+                    React directly to current percepts using condition-action rules. No memory of past states or planning for future actions.
+                </div>
+                
+                <div class="architecture-diagram reflex-diagram">
+                    <strong>Architecture Flow:</strong><br>
+                    Sensors → Condition-Action Rules → Actuators<br><br>
+                    if condition_met(percept):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;execute_action(action)
+                </div>
+                
+                <ul class="characteristics-list">
+                    <li class="characteristic-item">
+                        <i class="fas fa-check char-icon check-icon"></i>
+                        Fast response time
+                    </li>
+                    <li class="characteristic-item">
+                        <i class="fas fa-check char-icon check-icon"></i>
+                        Simple implementation
+                    </li>
+                    <li class="characteristic-item">
+                        <i class="fas fa-check char-icon check-icon"></i>
+                        Predictable behavior
+                    </li>
+                    <li class="characteristic-item">
+                        <i class="fas fa-times char-icon x-icon"></i>
+                        No learning capability
+                    </li>
+                    <li class="characteristic-item">
+                        <i class="fas fa-times char-icon x-icon"></i>
+                        Cannot handle partial observability
+                    </li>
+                </ul>
+                
+                <div class="code-example">
+class SimpleReflexAgent:
+    def __init__(self, rules):
+        self.rules = rules
+    
+    def act(self, percept):
+        for condition, action in self.rules:
+            if condition(percept):
+                return action
+        return None
+
+# Example: Thermostat
+rules = [
+    (lambda p: p['temp'] > 75, 'turn_on_ac'),
+    (lambda p: p['temp'] < 65, 'turn_on_heat'),
+    (lambda p: True, 'maintain')
+]
+
+agent = SimpleReflexAgent(rules)
+action = agent.act({'temp': 78})  # → 'turn_on_ac'
+                </div>
+            </div>
+            
+            <div class="agent-card model-card">
+                <div class="card-header">
+                    <div class="card-icon model-icon">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <div class="card-title">Model-Based Reflex Agents</div>
+                </div>
+                <div class="card-description">
+                    Maintain internal state and world model to handle partially observable environments and make better decisions.
+                </div>
+                
+                <div class="architecture-diagram model-diagram">
+                    <strong>Architecture Flow:</strong><br>
+                    Sensors → State Update → World Model → Rules → Actuators<br><br>
+                    state = update_state(state, action, percept)<br>
+                    action = rule_match(state, rules)
+                </div>
+                
+                <ul class="characteristics-list">
+                    <li class="characteristic-item">
+                        <i class="fas fa-check char-icon check-icon"></i>
+                        Handles partial observability
+                    </li>
+                    <li class="characteristic-item">
+                        <i class="fas fa-check char-icon check-icon"></i>
+                        Maintains context
+                    </li>
+                    <li class="characteristic-item">
+                        <i class="fas fa-check char-icon check-icon"></i>
+                        Better decision making
+                    </li>
+                    <li class="characteristic-item">
+                        <i class="fas fa-times char-icon x-icon"></i>
+                        More complex implementation
+                    </li>
+                    <li class="characteristic-item">
+                        <i class="fas fa-times char-icon x-icon"></i>
+                        Still no planning
+                    </li>
+                </ul>
+                
+                <div class="code-example">
+class ModelBasedReflexAgent:
+    def __init__(self, rules, transition_model):
+        self.rules = rules
+        self.state = {}
+        self.transition_model = transition_model
+        self.last_action = None
+    
+    def update_state(self, percept):
+        # Update internal state based on percept and last action
+        self.state = self.transition_model(
+            self.state, self.last_action, percept
+        )
+    
+    def act(self, percept):
+        self.update_state(percept)
+        
+        for condition, action in self.rules:
+            if condition(self.state):
+                self.last_action = action
+                return action
+        return None
+
+# Example: Smart home system
+def transition_model(state, action, percept):
+    return {
+        'room_occupied': percept.get('motion_detected', False),
+        'light_on': state.get('light_on', False),
+        'time_of_day': percept.get('time'),
+        'last_motion': percept.get('timestamp') if percept.get('motion_detected') else state.get('last_motion')
+    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Detailed Comparison</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th class="table-header">Aspect</th>
+                        <th class="table-header">Simple Reflex</th>
+                        <th class="table-header">Model-Based Reflex</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="table-cell font-semibold">Memory</td>
+                        <td class="table-cell">None</td>
+                        <td class="table-cell">Internal state tracking</td>
+                    </tr>
+                    <tr>
+                        <td class="table-cell font-semibold">Environment</td>
+                        <td class="table-cell">Fully observable only</td>
+                        <td class="table-cell">Partially observable</td>
+                    </tr>
+                    <tr>
+                        <td class="table-cell font-semibold">Complexity</td>
+                        <td class="table-cell">Very low</td>
+                        <td class="table-cell">Low to medium</td>
+                    </tr>
+                    <tr>
+                        <td class="table-cell font-semibold">Performance</td>
+                        <td class="table-cell">Fast, deterministic</td>
+                        <td class="table-cell">Moderate, more intelligent</td>
+                    </tr>
+                    <tr>
+                        <td class="table-cell font-semibold">Use Cases</td>
+                        <td class="table-cell">Simple automation, alerts</td>
+                        <td class="table-cell">Smart devices, monitoring</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="use-cases-section">
+            <h3 class="text-xl font-bold mb-2">Real-World Implementation Examples</h3>
+            <div class="use-cases-grid">
+                <div class="use-case-item">
+                    <div class="use-case-title">Simple Reflex: Alert Systems</div>
+                    <div class="use-case-desc">
+                        Server monitoring that sends alerts when CPU usage exceeds threshold. 
+                        No memory of previous states, just immediate response to current metrics.
+                    </div>
+                </div>
+                <div class="use-case-item">
+                    <div class="use-case-title">Simple Reflex: Basic Chatbots</div>
+                    <div class="use-case-desc">
+                        FAQ bots that match user input to predefined responses. 
+                        No conversation context, each interaction is independent.
+                    </div>
+                </div>
+                <div class="use-case-item">
+                    <div class="use-case-title">Model-Based: Smart Thermostats</div>
+                    <div class="use-case-desc">
+                        Learning user patterns, occupancy detection, and weather integration. 
+                        Maintains state about home conditions and user preferences.
+                    </div>
+                </div>
+                <div class="use-case-item">
+                    <div class="use-case-title">Model-Based: Security Systems</div>
+                    <div class="use-case-desc">
+                        Tracking movement patterns, maintaining zone states, and correlating 
+                        multiple sensor inputs for intelligent threat detection.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

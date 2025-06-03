@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 50px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .evolution-timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .timeline-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981, #3b82f6);
+            z-index: 0;
+        }
+        .evolution-stage {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+            width: 280px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.2s ease;
+        }
+        .evolution-stage:hover {
+            transform: translateY(-4px);
+        }
+        .stage-1 { border-top-color: #ef4444; }
+        .stage-2 { border-top-color: #f59e0b; }
+        .stage-3 { border-top-color: #10b981; }
+        .stage-4 { border-top-color: #3b82f6; }
+        
+        .stage-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .stage-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 16px;
+        }
+        .icon-1 { background: #ef4444; }
+        .icon-2 { background: #f59e0b; }
+        .icon-3 { background: #10b981; }
+        .icon-4 { background: #3b82f6; }
+        
+        .stage-title {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 16px;
+        }
+        .stage-period {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .stage-description {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+        .stage-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .feature-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 8px;
+        }
+        .limitations-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .limitations-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 16px;
+        }
+        .limitation-card {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .limitation-title {
+            font-weight: 600;
+            color: #dc2626;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .limitation-desc {
+            color: #7f1d1d;
+            font-size: 14px;
+        }
+        .agent-advantages {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .advantage-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .advantage-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #6ee7b7;
+        }
+        .advantage-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .advantage-desc {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Evolution from Traditional AI to Agentic AI</h1>
+            <p class="text-lg text-gray-600">Understanding the Technical Progression and Paradigm Shift</p>
+        </div>
+        
+        <div class="evolution-timeline">
+            <div class="timeline-line"></div>
+            
+            <div class="evolution-stage stage-1">
+                <div class="stage-header">
+                    <div class="stage-icon icon-1">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div>
+                        <div class="stage-title">Rule-Based Systems</div>
+                        <div class="stage-period">1970s-1990s</div>
+                    </div>
+                </div>
+                <div class="stage-description">
+                    Hard-coded logic with predetermined decision trees and expert system rules.
+                </div>
+                <ul class="stage-features">
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        If-then rule engines
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Expert knowledge encoding
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Deterministic outputs
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="evolution-stage stage-2">
+                <div class="stage-header">
+                    <div class="stage-icon icon-2">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div>
+                        <div class="stage-title">Machine Learning</div>
+                        <div class="stage-period">1990s-2010s</div>
+                    </div>
+                </div>
+                <div class="stage-description">
+                    Statistical models that learn patterns from data but require extensive feature engineering.
+                </div>
+                <ul class="stage-features">
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Pattern recognition
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Supervised learning
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Feature engineering
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="evolution-stage stage-3">
+                <div class="stage-header">
+                    <div class="stage-icon icon-3">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div>
+                        <div class="stage-title">LLM Applications</div>
+                        <div class="stage-period">2020-2023</div>
+                    </div>
+                </div>
+                <div class="stage-description">
+                    Large Language Models enabling natural language understanding and generation.
+                </div>
+                <ul class="stage-features">
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Text generation
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Context understanding
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Few-shot learning
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="evolution-stage stage-4">
+                <div class="stage-header">
+                    <div class="stage-icon icon-4">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="stage-title">AI Agents</div>
+                        <div class="stage-period">2023-Present</div>
+                    </div>
+                </div>
+                <div class="stage-description">
+                    Autonomous systems that reason, plan, and act using LLMs as cognitive engines.
+                </div>
+                <ul class="stage-features">
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Autonomous reasoning
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Tool orchestration
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Goal-oriented behavior
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="limitations-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Technical Limitations of Previous Approaches</h3>
+            <div class="limitations-grid">
+                <div class="limitation-card">
+                    <div class="limitation-title">
+                        <i class="fas fa-lock mr-2"></i>
+                        Rigid Architecture
+                    </div>
+                    <div class="limitation-desc">
+                        Traditional systems require complete reprogramming for new scenarios. No dynamic adaptation to changing requirements or unexpected situations.
+                    </div>
+                </div>
+                <div class="limitation-card">
+                    <div class="limitation-title">
+                        <i class="fas fa-disconnect mr-2"></i>
+                        Isolated Functionality
+                    </div>
+                    <div class="limitation-desc">
+                        Each system operates in isolation without ability to coordinate with other tools or services. Limited integration capabilities.
+                    </div>
+                </div>
+                <div class="limitation-card">
+                    <div class="limitation-title">
+                        <i class="fas fa-user-cog mr-2"></i>
+                        Human Dependency
+                    </div>
+                    <div class="limitation-desc">
+                        Requires constant human oversight and intervention. Cannot make autonomous decisions or adapt behavior based on outcomes.
+                    </div>
+                </div>
+                <div class="limitation-card">
+                    <div class="limitation-title">
+                        <i class="fas fa-memory mr-2"></i>
+                        No Learning
+                    </div>
+                    <div class="limitation-desc">
+                        Systems cannot learn from experience or improve performance over time. Each interaction starts from scratch.
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="agent-advantages">
+            <h3 class="text-xl font-bold mb-2">How AI Agents Overcome These Constraints</h3>
+            <div class="advantages-grid">
+                <div class="advantage-item">
+                    <div class="advantage-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="advantage-title">Dynamic Reasoning</div>
+                    <div class="advantage-desc">LLMs enable flexible problem-solving and adaptation to new scenarios without reprogramming</div>
+                </div>
+                <div class="advantage-item">
+                    <div class="advantage-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="advantage-title">Tool Orchestration</div>
+                    <div class="advantage-desc">Agents can dynamically select and combine multiple tools to achieve complex objectives</div>
+                </div>
+                <div class="advantage-item">
+                    <div class="advantage-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div class="advantage-title">Autonomous Operation</div>
+                    <div class="advantage-desc">Reduced human intervention through intelligent decision-making and self-correction capabilities</div>
+                </div>
+                <div class="advantage-item">
+                    <div class="advantage-icon">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <div class="advantage-title">Persistent Memory</div>
+                    <div class="advantage-desc">Learn from interactions and maintain context across sessions for improved performance</div>
+                </div>
+                <div class="advantage-item">
+                    <div class="advantage-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="advantage-title">Multi-Step Planning</div>
+                    <div class="advantage-desc">Break down complex goals into actionable steps and adapt plans based on feedback</div>
+                </div>
+                <div class="advantage-item">
+                    <div class="advantage-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <div class="advantage-title">System Integration</div>
+                    <div class="advantage-desc">Seamlessly integrate with existing APIs, databases, and enterprise systems</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

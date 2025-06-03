@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #8b5cf6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .frameworks-overview {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .overview-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .overview-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .overview-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .frameworks-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .framework-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+            transition: transform 0.2s ease;
+        }
+        .framework-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .autogen-card { border-top-color: #8b5cf6; }
+        .crewai-card { border-top-color: #06b6d4; }
+        
+        .framework-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .framework-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .autogen-logo { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .crewai-logo { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        
+        .framework-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .framework-subtitle {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+        .framework-description {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .features-section {
+            margin-bottom: 16px;
+        }
+        .features-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .feature-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 10px;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+        .autogen-bullet { background: #8b5cf6; }
+        .crewai-bullet { background: #06b6d4; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .autogen-stat { color: #8b5cf6; }
+        .crewai-stat { color: #06b6d4; }
+        
+        .stat-label {
+            font-size: 10px;
+            color: #64748b;
+        }
+        .code-examples {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .code-tabs {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+        .code-tab {
+            padding: 8px 16px;
+            background: #f8fafc;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        .code-tab.active {
+            background: #8b5cf6;
+            color: white;
+        }
+        .code-content {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .code-header i {
+            color: #8b5cf6;
+        }
+        .code-body {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .comparison-matrix {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin-top: 16px;
+        }
+        .matrix-table th {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .matrix-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            vertical-align: top;
+        }
+        .matrix-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .strength-indicator {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+        .high-strength { background: #10b981; color: white; }
+        .medium-strength { background: #f59e0b; color: white; }
+        .low-strength { background: #ef4444; color: white; }
+        .use-cases {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+        .use-case-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .use-case-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .use-case-icon {
+            margin-right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        .autogen-icon { background: #8b5cf6; }
+        .crewai-icon { background: #06b6d4; }
+        
+        .use-case-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .use-case-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .use-case-bullet {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            margin-right: 8px;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">AutoGen and CrewAI</h1>
+            <p class="text-lg text-gray-600">Specialized Multi-Agent Frameworks for Collaboration and Code Generation</p>
+        </div>
+        
+        <div class="frameworks-overview">
+            <div class="overview-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="overview-content">
+                <h3>Multi-Agent Collaboration Frameworks</h3>
+                <p>
+                    Two specialized frameworks designed for different aspects of multi-agent systems: 
+                    AutoGen for conversational AI and code generation, CrewAI for role-based team workflows.
+                </p>
+            </div>
+        </div>
+        
+        <div class="frameworks-grid">
+            <div class="framework-card autogen-card">
+                <div class="framework-header">
+                    <div class="framework-logo autogen-logo">AG</div>
+                    <div>
+                        <div class="framework-title">Microsoft AutoGen</div>
+                        <div class="framework-subtitle">Multi-Agent Conversation Framework</div>
+                    </div>
+                </div>
+                <div class="framework-description">
+                    Microsoft's research-driven framework for creating conversational multi-agent systems 
+                    with sophisticated interaction patterns, code generation capabilities, and human-in-the-loop integration.
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number autogen-stat">25k+</div>
+                        <div class="stat-label">GitHub Stars</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number autogen-stat">300+</div>
+                        <div class="stat-label">Contributors</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number autogen-stat">2023</div>
+                        <div class="stat-label">First Release</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number autogen-stat">Python</div>
+                        <div class="stat-label">Language</div>
+                    </div>
+                </div>
+                
+                <div class="features-section">
+                    <div class="features-title">Key Features</div>
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <div class="feature-bullet autogen-bullet"></div>
+                            Multi-agent conversation orchestration with flexible patterns
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet autogen-bullet"></div>
+                            Advanced code generation and execution capabilities
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet autogen-bullet"></div>
+                            Human-in-the-loop integration for complex decision making
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet autogen-bullet"></div>
+                            Customizable agent roles and interaction protocols
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet autogen-bullet"></div>
+                            Research-grade conversation patterns and flows
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet autogen-bullet"></div>
+                            Integration with multiple LLM providers
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="framework-card crewai-card">
+                <div class="framework-header">
+                    <div class="framework-logo crewai-logo">CA</div>
+                    <div>
+                        <div class="framework-title">CrewAI</div>
+                        <div class="framework-subtitle">Role-Based Multi-Agent Framework</div>
+                    </div>
+                </div>
+                <div class="framework-description">
+                    Business-focused framework for creating teams of AI agents with defined roles, responsibilities, 
+                    and collaborative workflows designed for real-world business process automation.
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number crewai-stat">15k+</div>
+                        <div class="stat-label">GitHub Stars</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number crewai-stat">150+</div>
+                        <div class="stat-label">Contributors</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number crewai-stat">2023</div>
+                        <div class="stat-label">First Release</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number crewai-stat">Python</div>
+                        <div class="stat-label">Language</div>
+                    </div>
+                </div>
+                
+                <div class="features-section">
+                    <div class="features-title">Key Features</div>
+                    <ul class="features-list">
+                        <li class="feature-item">
+                            <div class="feature-bullet crewai-bullet"></div>
+                            Role-based agent specialization with clear responsibilities
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet crewai-bullet"></div>
+                            Hierarchical task delegation and workflow management
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet crewai-bullet"></div>
+                            Process-driven execution with built-in collaboration patterns
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet crewai-bullet"></div>
+                            Task result validation and quality assurance
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet crewai-bullet"></div>
+                            Business-oriented workflow templates and patterns
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet crewai-bullet"></div>
+                            Integration with popular business tools and APIs
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="code-examples">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Implementation Examples</h3>
+            
+            <div class="code-content">
+                <div class="code-header">
+                    <div>
+                        <i class="fas fa-code"></i>
+                        AutoGen vs CrewAI Implementation Comparison
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.7;">Python Examples</div>
+                </div>
+                <div class="code-body">
+<pre><code class="language-python"># AutoGen Implementation Example
+import autogen
+from autogen import AssistantAgent, UserProxyAgent, GroupChat, GroupChatManager
+
+# Configure LLM
+config_list = [
+    {
+        "model": "gpt-4",
+        "api_key": "your-api-key",
+    }
+]
+
+llm_config = {
+    "config_list": config_list,
+    "temperature": 0,
+}
+
+# Create specialized agents
+user_proxy = UserProxyAgent(
+    name="user_proxy",
+    system_message="A human admin who will give the task and manage the conversation.",
+    code_execution_config={"last_n_messages": 2, "work_dir": "groupchat"},
+    human_input_mode="TERMINATE"
+)
+
+coder = AssistantAgent(
+    name="coder",
+    system_message="""You are a senior software engineer. You write clean, efficient code 
+    and provide detailed explanations. You can execute code and debug issues.""",
+    llm_config=llm_config,
+)
+
+reviewer = AssistantAgent(
+    name="reviewer",
+    system_message="""You are a code reviewer. You review code for best practices, 
+    security issues, and optimization opportunities. Provide constructive feedback.""",
+    llm_config=llm_config,
+)
+
+tester = AssistantAgent(
+    name="tester",
+    system_message="""You are a QA engineer. You write comprehensive tests, 
+    identify edge cases, and ensure code quality.""",
+    llm_config=llm_config,
+)
+
+# Create group chat
+groupchat = GroupChat(
+    agents=[user_proxy, coder, reviewer, tester],
+    messages=[],
+    max_round=20
+)
+
+manager = GroupChatManager(groupchat=groupchat, llm_config=llm_config)
+
+# Execute conversation
+user_proxy.initiate_chat(
+    manager,
+    message="Create a Python function to calculate fibonacci numbers with proper error handling and tests."
+)
+
+# Advanced AutoGen with custom conversation patterns
+class CustomGroupChat(GroupChat):
+    """Custom group chat with specialized conversation patterns"""
+    
+    def select_speaker(self, last_speaker, selector):
+        """Custom speaker selection logic"""
+        if last_speaker.name == "coder":
+            return self.agent_by_name("reviewer")
+        elif last_speaker.name == "reviewer":
+            return self.agent_by_name("tester")
+        elif last_speaker.name == "tester":
+            return self.agent_by_name("coder")
+        else:
+            return super().select_speaker(last_speaker, selector)
+
+# CrewAI Implementation Example
+from crewai import Agent, Task, Crew, Process
+from crewai_tools import SerperDevTool, WebsiteSearchTool
+
+# Initialize tools
+search_tool = SerperDevTool()
+web_search_tool = WebsiteSearchTool()
+
+# Create specialized agents with roles
+researcher = Agent(
+    role='Senior Research Analyst',
+    goal='Uncover cutting-edge developments in AI and data science',
+    backstory="""You work at a leading tech think tank. Your expertise lies in 
+    identifying emerging trends and technologies in AI, machine learning, and data science.""",
+    verbose=True,
+    allow_delegation=False,
+    tools=[search_tool, web_search_tool]
+)
+
+writer = Agent(
+    role='Tech Content Strategist',
+    goal='Craft compelling content on tech advancements',
+    backstory="""You are a renowned Content Strategist, known for your insightful 
+    and engaging articles on technology and innovation.""",
+    verbose=True,
+    allow_delegation=True,
+)
+
+editor = Agent(
+    role='Content Editor',
+    goal='Edit and refine content for publication',
+    backstory="""You are an experienced editor with a keen eye for detail and 
+    a passion for clear, concise communication.""",
+    verbose=True,
+    allow_delegation=False,
+)
+
+# Define tasks
+research_task = Task(
+    description="""Conduct a comprehensive analysis of the latest advancements in AI agents.
+    Identify key trends, breakthrough technologies, and their potential impact on various industries.
+    Your final answer MUST be a full analysis report""",
+    agent=researcher
+)
+
+write_task = Task(
+    description="""Using the research analyst's report, develop an engaging blog post 
+    that highlights the most significant AI advancements. Make it accessible to a general audience 
+    while maintaining technical accuracy.""",
+    agent=writer
+)
+
+edit_task = Task(
+    description="""Review and edit the blog post for clarity, engagement, and accuracy. 
+    Ensure it meets publication standards and flows well.""",
+    agent=editor
+)
+
+# Create crew with hierarchical process
+crew = Crew(
+    agents=[researcher, writer, editor],
+    tasks=[research_task, write_task, edit_task],
+    verbose=2,
+    process=Process.sequential  # or Process.hierarchical
+)
+
+# Execute the crew
+result = crew.kickoff()
+
+# Advanced CrewAI with custom processes
+class CustomCrew(Crew):
+    """Custom crew with specialized workflow patterns"""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.quality_threshold = 0.8
+        self.max_iterations = 3
+    
+    def execute_with_quality_control(self):
+        """Execute crew with quality control loops"""
+        iteration = 0
+        while iteration < self.max_iterations:
+            result = self.kickoff()
+            quality_score = self.evaluate_quality(result)
+            
+            if quality_score >= self.quality_threshold:
+                return result
+            
+            # Provide feedback for improvement
+            self.provide_feedback(result, quality_score)
+            iteration += 1
+        
+        return result
+    
+    def evaluate_quality(self, result):
+        """Evaluate the quality of the crew's output"""
+        # Implement quality evaluation logic
+        return 0.9  # Placeholder
+    
+    def provide_feedback(self, result, score):
+        """Provide feedback to agents for improvement"""
+        feedback_agent = Agent(
+            role='Quality Assessor',
+            goal='Provide constructive feedback for improvement',
+            backstory='You are an expert in quality assessment and improvement.'
+        )
+        
+        feedback_task = Task(
+            description=f"""Review the following result and provide specific feedback 
+            for improvement. Current quality score: {score}
+            
+            Result: {result}""",
+            agent=feedback_agent
+        )
+        
+        # Execute feedback task
+        feedback = feedback_task.execute()
+        return feedback
+
+# Comparison: AutoGen vs CrewAI for different use cases
+
+def autogen_code_review_workflow():
+    """AutoGen workflow for code review and development"""
+    
+    # Specialized agents for code development
+    architect = AssistantAgent(
+        name="architect",
+        system_message="You design software architecture and system design.",
+        llm_config=llm_config
+    )
+    
+    developer = AssistantAgent(
+        name="developer", 
+        system_message="You implement code based on architectural designs.",
+        llm_config=llm_config
+    )
+    
+    reviewer = AssistantAgent(
+        name="reviewer",
+        system_message="You review code for quality, security, and best practices.",
+        llm_config=llm_config
+    )
+    
+    # Create conversation flow
+    groupchat = GroupChat(
+        agents=[user_proxy, architect, developer, reviewer],
+        messages=[],
+        max_round=15
+    )
+    
+    manager = GroupChatManager(groupchat=groupchat, llm_config=llm_config)
+    
+    return manager
+
+def crewai_business_workflow():
+    """CrewAI workflow for business process automation"""
+    
+    # Business-focused agents
+    analyst = Agent(
+        role='Business Analyst',
+        goal='Analyze business requirements and processes',
+        backstory='Expert in business process analysis and optimization.'
+    )
+    
+    strategist = Agent(
+        role='Strategy Consultant', 
+        goal='Develop strategic recommendations',
+        backstory='Senior consultant with expertise in business strategy.'
+    )
+    
+    implementer = Agent(
+        role='Implementation Specialist',
+        goal='Create actionable implementation plans',
+        backstory='Expert in turning strategies into executable plans.'
+    )
+    
+    # Define business tasks
+    analysis_task = Task(
+        description="Analyze the current business process and identify improvement opportunities.",
+        agent=analyst
+    )
+    
+    strategy_task = Task(
+        description="Develop strategic recommendations based on the analysis.",
+        agent=strategist
+    )
+    
+    implementation_task = Task(
+        description="Create a detailed implementation plan for the recommended strategies.",
+        agent=implementer
+    )
+    
+    # Create business crew
+    business_crew = Crew(
+        agents=[analyst, strategist, implementer],
+        tasks=[analysis_task, strategy_task, implementation_task],
+        process=Process.sequential
+    )
+    
+    return business_crew
+
+# Usage examples
+if __name__ == "__main__":
+    # AutoGen for technical collaboration
+    print("=== AutoGen Code Review Workflow ===")
+    autogen_manager = autogen_code_review_workflow()
+    
+    # CrewAI for business processes
+    print("=== CrewAI Business Workflow ===")
+    business_crew = crewai_business_workflow()
+    result = business_crew.kickoff()
+    print(f"Business workflow result: {result}")
+</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-matrix">
+            <h3 class="text-xl font-bold mb-2">Detailed Framework Comparison</h3>
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>Aspect</th>
+                        <th>AutoGen</th>
+                        <th>CrewAI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Primary Focus</strong></td>
+                        <td>
+                            <span class="strength-indicator high-strength">High</span>
+                            Conversational AI and code generation
+                        </td>
+                        <td>
+                            <span class="strength-indicator high-strength">High</span>
+                            Business workflows and role-based teams
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Agent Interaction</strong></td>
+                        <td>
+                            <span class="strength-indicator high-strength">High</span>
+                            Flexible conversation patterns, group chats
+                        </td>
+                        <td>
+                            <span class="strength-indicator medium-strength">Medium</span>
+                            Sequential and hierarchical processes
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Code Generation</strong></td>
+                        <td>
+                            <span class="strength-indicator high-strength">High</span>
+                            Built-in code execution and debugging
+                        </td>
+                        <td>
+                            <span class="strength-indicator low-strength">Low</span>
+                            Limited code generation capabilities
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Business Integration</strong></td>
+                        <td>
+                            <span class="strength-indicator medium-strength">Medium</span>
+                            Research-focused, limited business tools
+                        </td>
+                        <td>
+                            <span class="strength-indicator high-strength">High</span>
+                            Extensive business tool integrations
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning Curve</strong></td>
+                        <td>
+                            <span class="strength-indicator medium-strength">Medium</span>
+                            Moderate complexity, research-oriented
+                        </td>
+                        <td>
+                            <span class="strength-indicator high-strength">High</span>
+                            Business-friendly, intuitive concepts
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Customization</strong></td>
+                        <td>
+                            <span class="strength-indicator high-strength">High</span>
+                            Highly customizable conversation flows
+                        </td>
+                        <td>
+                            <span class="strength-indicator medium-strength">Medium</span>
+                            Role and process customization
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Production Ready</strong></td>
+                        <td>
+                            <span class="strength-indicator medium-strength">Medium</span>
+                            Research-grade, evolving rapidly
+                        </td>
+                        <td>
+                            <span class="strength-indicator high-strength">High</span>
+                            Business-focused, production-oriented
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Community Support</strong></td>
+                        <td>
+                            <span class="strength-indicator high-strength">High</span>
+                            Microsoft backing, active research community
+                        </td>
+                        <td>
+                            <span class="strength-indicator medium-strength">Medium</span>
+                            Growing business user community
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="use-cases">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Ideal Use Cases</h3>
+            <div class="use-cases-grid">
+                <div class="use-case-section">
+                    <div class="use-case-title">
+                        <div class="use-case-icon autogen-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        AutoGen Best For
+                    </div>
+                    <ul class="use-case-list">
+                        <li class="use-case-item">
+                            <div class="use-case-bullet autogen-bullet"></div>
+                            Software development and code review workflows
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet autogen-bullet"></div>
+                            Research and experimentation with conversational AI
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet autogen-bullet"></div>
+                            Educational and training applications
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet autogen-bullet"></div>
+                            Complex problem-solving requiring multiple perspectives
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet autogen-bullet"></div>
+                            Human-in-the-loop decision making processes
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet autogen-bullet"></div>
+                            Automated code generation and testing
+                        </li>
+                    </ul>
+                </div>
+                <div class="use-case-section">
+                    <div class="use-case-title">
+                        <div class="use-case-icon crewai-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        CrewAI Best For
+                    </div>
+                    <ul class="use-case-list">
+                        <li class="use-case-item">
+                            <div class="use-case-bullet crewai-bullet"></div>
+                            Business process automation and optimization
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet crewai-bullet"></div>
+                            Content creation and marketing workflows
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet crewai-bullet"></div>
+                            Research and analysis projects
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet crewai-bullet"></div>
+                            Customer service and support automation
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet crewai-bullet"></div>
+                            Project management and coordination
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet crewai-bullet"></div>
+                            Quality assurance and validation workflows
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

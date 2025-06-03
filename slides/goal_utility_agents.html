@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #10b981;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .agent-types-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .agent-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+        }
+        .goal-card { border-top-color: #10b981; }
+        .utility-card { border-top-color: #06b6d4; }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+            font-size: 20px;
+        }
+        .goal-icon { background: linear-gradient(135deg, #10b981, #059669); }
+        .utility-icon { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .card-description {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .architecture-diagram {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid;
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+        }
+        .goal-diagram { border-left-color: #10b981; }
+        .utility-diagram { border-left-color: #06b6d4; }
+        
+        .algorithm-section {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .algorithm-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .algorithm-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .algorithm-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #475569;
+        }
+        .algo-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .code-example {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
+            margin-top: 12px;
+        }
+        .comparison-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .planning-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            position: relative;
+        }
+        .flow-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #10b981, #06b6d4);
+            z-index: 0;
+        }
+        .flow-step {
+            background: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+            border: 3px solid #10b981;
+        }
+        .step-icon {
+            font-size: 16px;
+            color: #10b981;
+            margin-bottom: 2px;
+        }
+        .step-label {
+            font-size: 8px;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: center;
+        }
+        .implementation-examples {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .example-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .example-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #06b6d4;
+        }
+        .example-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .example-tech {
+            font-size: 10px;
+            opacity: 0.7;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Goal-Based and Utility-Based Agents</h1>
+            <p class="text-lg text-gray-600">Planning, Optimization, and Decision-Making Agents</p>
+        </div>
+        
+        <div class="agent-types-grid">
+            <div class="agent-card goal-card">
+                <div class="card-header">
+                    <div class="card-icon goal-icon">
+                        <i class="fas fa-target"></i>
+                    </div>
+                    <div class="card-title">Goal-Based Agents</div>
+                </div>
+                <div class="card-description">
+                    Plan sequences of actions to achieve specific goals using search algorithms and planning techniques.
+                </div>
+                
+                <div class="architecture-diagram goal-diagram">
+                    <strong>Architecture Flow:</strong><br>
+                    Goals + Current State → Planning Algorithm → Action Sequence<br><br>
+                    plan = search(current_state, goal_state)<br>
+                    execute(plan[next_step])
+                </div>
+                
+                <div class="algorithm-section">
+                    <div class="algorithm-title">Planning Algorithms</div>
+                    <ul class="algorithm-list">
+                        <li class="algorithm-item">
+                            <div class="algo-bullet"></div>
+                            A* Search for optimal pathfinding
+                        </li>
+                        <li class="algorithm-item">
+                            <div class="algo-bullet"></div>
+                            STRIPS for classical planning
+                        </li>
+                        <li class="algorithm-item">
+                            <div class="algo-bullet"></div>
+                            Hierarchical Task Networks (HTN)
+                        </li>
+                        <li class="algorithm-item">
+                            <div class="algo-bullet"></div>
+                            Monte Carlo Tree Search
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="code-example">
+class GoalBasedAgent:
+    def __init__(self, planner, goal):
+        self.planner = planner
+        self.goal = goal
+        self.plan = []
+        self.current_step = 0
+    
+    def act(self, state):
+        if not self.plan or self.goal_achieved(state):
+            self.plan = self.planner.search(state, self.goal)
+            self.current_step = 0
+        
+        if self.current_step < len(self.plan):
+            action = self.plan[self.current_step]
+            self.current_step += 1
+            return action
+        
+        return None
+    
+    def goal_achieved(self, state):
+        return self.goal.satisfied(state)
+
+# Example: Route planning
+goal = Location(lat=37.7749, lng=-122.4194)  # San Francisco
+agent = GoalBasedAgent(AStarPlanner(), goal)
+                </div>
+            </div>
+            
+            <div class="agent-card utility-card">
+                <div class="card-header">
+                    <div class="card-icon utility-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="card-title">Utility-Based Agents</div>
+                </div>
+                <div class="card-description">
+                    Optimize decisions based on utility functions that measure the desirability of different outcomes and trade-offs.
+                </div>
+                
+                <div class="architecture-diagram utility-diagram">
+                    <strong>Architecture Flow:</strong><br>
+                    State + Actions → Utility Function → Expected Utility → Best Action<br><br>
+                    best_action = argmax(expected_utility(action, state))
+                </div>
+                
+                <div class="algorithm-section">
+                    <div class="algorithm-title">Optimization Techniques</div>
+                    <ul class="algorithm-list">
+                        <li class="algorithm-item">
+                            <div class="algo-bullet"></div>
+                            Expected Utility Maximization
+                        </li>
+                        <li class="algorithm-item">
+                            <div class="algo-bullet"></div>
+                            Multi-Objective Optimization
+                        </li>
+                        <li class="algorithm-item">
+                            <div class="algo-bullet"></div>
+                            Markov Decision Processes
+                        </li>
+                        <li class="algorithm-item">
+                            <div class="algo-bullet"></div>
+                            Game Theory Applications
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="code-example">
+class UtilityBasedAgent:
+    def __init__(self, utility_function, actions):
+        self.utility_function = utility_function
+        self.actions = actions
+    
+    def act(self, state):
+        best_action = None
+        best_utility = float('-inf')
+        
+        for action in self.actions:
+            expected_utility = self.calculate_expected_utility(
+                action, state
+            )
+            
+            if expected_utility > best_utility:
+                best_utility = expected_utility
+                best_action = action
+        
+        return best_action
+    
+    def calculate_expected_utility(self, action, state):
+        # Calculate expected utility considering uncertainty
+        total_utility = 0
+        for outcome, probability in self.get_outcomes(action, state):
+            utility = self.utility_function(outcome)
+            total_utility += probability * utility
+        return total_utility
+
+# Example: Investment portfolio optimization
+def portfolio_utility(portfolio):
+    return portfolio.expected_return - 0.5 * portfolio.risk
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Planning and Decision-Making Process</h3>
+            <div class="planning-flow">
+                <div class="flow-line"></div>
+                
+                <div class="flow-step">
+                    <div class="step-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <div class="step-label">Perceive</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="step-label">Analyze</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="step-label">Plan</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="step-label">Optimize</div>
+                </div>
+                
+                <div class="flow-step">
+                    <div class="step-icon">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <div class="step-label">Execute</div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Goal-Based Focus</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="display: flex; align-items: center; margin-bottom: 6px; font-size: 13px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; margin-right: 8px;"></div>
+                            Binary goal satisfaction (achieved/not achieved)
+                        </li>
+                        <li style="display: flex; align-items: center; margin-bottom: 6px; font-size: 13px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; margin-right: 8px;"></div>
+                            Optimal path finding to goal state
+                        </li>
+                        <li style="display: flex; align-items: center; margin-bottom: 6px; font-size: 13px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; margin-right: 8px;"></div>
+                            Clear success/failure criteria
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800 mb-2">Utility-Based Focus</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="display: flex; align-items: center; margin-bottom: 6px; font-size: 13px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #06b6d4; margin-right: 8px;"></div>
+                            Continuous optimization of outcomes
+                        </li>
+                        <li style="display: flex; align-items: center; margin-bottom: 6px; font-size: 13px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #06b6d4; margin-right: 8px;"></div>
+                            Trade-off analysis between competing objectives
+                        </li>
+                        <li style="display: flex; align-items: center; margin-bottom: 6px; font-size: 13px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #06b6d4; margin-right: 8px;"></div>
+                            Handles uncertainty and probabilistic outcomes
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="implementation-examples">
+            <h3 class="text-xl font-bold mb-2">Real-World Implementation Examples</h3>
+            <div class="examples-grid">
+                <div class="example-item">
+                    <div class="example-title">Goal-Based: Automated Testing</div>
+                    <div class="example-desc">
+                        Agent plans test execution sequence to achieve 100% code coverage goal. 
+                        Uses dependency analysis to determine optimal test order.
+                    </div>
+                    <div class="example-tech">Technologies: pytest, coverage.py, dependency graphs</div>
+                </div>
+                <div class="example-item">
+                    <div class="example-title">Goal-Based: CI/CD Pipeline</div>
+                    <div class="example-desc">
+                        Orchestrates build, test, and deployment steps to achieve successful release goal. 
+                        Handles rollbacks and retry logic.
+                    </div>
+                    <div class="example-tech">Technologies: Jenkins, GitHub Actions, Docker</div>
+                </div>
+                <div class="example-item">
+                    <div class="example-title">Utility-Based: Resource Allocation</div>
+                    <div class="example-desc">
+                        Optimizes cloud resource allocation balancing cost, performance, and reliability. 
+                        Considers multiple competing objectives.
+                    </div>
+                    <div class="example-tech">Technologies: Kubernetes, AWS Auto Scaling, cost optimization</div>
+                </div>
+                <div class="example-item">
+                    <div class="example-title">Utility-Based: A/B Testing</div>
+                    <div class="example-desc">
+                        Dynamically allocates traffic between variants to maximize conversion while 
+                        minimizing statistical uncertainty.
+                    </div>
+                    <div class="example-tech">Technologies: statistical analysis, multi-armed bandits</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

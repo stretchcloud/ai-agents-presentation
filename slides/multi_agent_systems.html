@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #10b981;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .systems-overview {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .systems-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .systems-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .systems-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .architecture-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .coordination-patterns {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .pattern-item {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #10b981;
+        }
+        .pattern-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        .pattern-desc {
+            color: #64748b;
+            font-size: 12px;
+        }
+        .code-section {
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .code-header i {
+            margin-right: 8px;
+            color: #10b981;
+        }
+        .code-content {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .communication-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .communication-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .comm-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid;
+        }
+        .direct-card { border-top-color: #3b82f6; }
+        .broadcast-card { border-top-color: #f59e0b; }
+        .mediated-card { border-top-color: #8b5cf6; }
+        
+        .comm-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .comm-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .direct-icon { background: #3b82f6; }
+        .broadcast-icon { background: #f59e0b; }
+        .mediated-icon { background: #8b5cf6; }
+        
+        .comm-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .comm-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .comm-examples {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .example-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #475569;
+        }
+        .example-bullet {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .challenges-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .challenge-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .challenge-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+        }
+        .challenge-icon {
+            margin-right: 8px;
+        }
+        .challenge-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .solution-desc {
+            font-size: 11px;
+            opacity: 0.7;
+            color: #06b6d4;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Multi-Agent Systems</h1>
+            <p class="text-lg text-gray-600">Coordination, Communication, and Collaborative Intelligence</p>
+        </div>
+        
+        <div class="systems-overview">
+            <div class="systems-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="systems-content">
+                <h3>Collaborative Agent Networks</h3>
+                <p>
+                    Multi-agent systems enable multiple AI agents to work together, sharing information, 
+                    coordinating actions, and solving complex problems that exceed individual agent capabilities.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="architecture-section">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">Coordination Patterns</h3>
+                
+                <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #10b981;">
+                    <strong>Core Principles:</strong><br>
+                    Autonomy + Coordination + Communication = Emergent Intelligence
+                </div>
+                
+                <div class="coordination-patterns">
+                    <div class="pattern-item">
+                        <div class="pattern-title">Hierarchical Coordination</div>
+                        <div class="pattern-desc">Manager agents delegate tasks to worker agents with clear command structure</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div class="pattern-title">Peer-to-Peer Collaboration</div>
+                        <div class="pattern-desc">Equal agents negotiate and coordinate through consensus mechanisms</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div class="pattern-title">Market-Based Coordination</div>
+                        <div class="pattern-desc">Agents bid for tasks and resources using economic principles</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div class="pattern-title">Swarm Intelligence</div>
+                        <div class="pattern-desc">Simple agents follow local rules to achieve global optimization</div>
+                    </div>
+                    <div class="pattern-item">
+                        <div class="pattern-title">Blackboard Systems</div>
+                        <div class="pattern-desc">Shared knowledge space where agents contribute and consume information</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <i class="fas fa-code"></i>
+                    Multi-Agent System Implementation
+                </div>
+                <div class="code-content">
+<pre><code class="language-python">class MultiAgentSystem:
+    def __init__(self):
+        self.agents = {}
+        self.message_bus = MessageBus()
+        self.coordinator = Coordinator()
+        self.shared_memory = SharedMemory()
+        
+    def add_agent(self, agent_id, agent):
+        """Register a new agent in the system"""
+        self.agents[agent_id] = agent
+        agent.set_system_context(self.message_bus, self.shared_memory)
+        
+    def broadcast_message(self, sender_id, message):
+        """Send message to all agents"""
+        for agent_id, agent in self.agents.items():
+            if agent_id != sender_id:
+                agent.receive_message(sender_id, message)
+                
+    def coordinate_task(self, task):
+        """Coordinate task execution across agents"""
+        # Decompose task into subtasks
+        subtasks = self.coordinator.decompose_task(task)
+        
+        # Assign subtasks to appropriate agents
+        assignments = self.coordinator.assign_tasks(subtasks, self.agents)
+        
+        # Execute with coordination
+        results = {}
+        for agent_id, subtask in assignments.items():
+            agent = self.agents[agent_id]
+            results[agent_id] = agent.execute_task(subtask)
+            
+        # Aggregate results
+        return self.coordinator.aggregate_results(results)
+
+class CollaborativeAgent:
+    def __init__(self, agent_id, capabilities):
+        self.agent_id = agent_id
+        self.capabilities = capabilities
+        self.message_bus = None
+        self.shared_memory = None
+        self.peers = set()
+        
+    def set_system_context(self, message_bus, shared_memory):
+        self.message_bus = message_bus
+        self.shared_memory = shared_memory
+        
+    def negotiate_task(self, task):
+        """Negotiate task assignment with peers"""
+        # Assess own capability for task
+        capability_score = self.assess_capability(task)
+        
+        # Request peer capabilities
+        peer_scores = {}
+        for peer_id in self.peers:
+            response = self.message_bus.send_request(
+                peer_id, 
+                {"type": "capability_query", "task": task}
+            )
+            peer_scores[peer_id] = response.get("score", 0)
+            
+        # Decide on task assignment
+        best_agent = max(
+            {self.agent_id: capability_score, **peer_scores}.items(),
+            key=lambda x: x[1]
+        )[0]
+        
+        return best_agent == self.agent_id
+        
+    def collaborate_on_task(self, task):
+        """Collaborate with other agents on complex task"""
+        # Share task context
+        self.shared_memory.store(f"task_{task.id}", {
+            "description": task.description,
+            "requirements": task.requirements,
+            "progress": 0
+        })
+        
+        # Request collaboration
+        collaborators = self.find_collaborators(task)
+        
+        # Coordinate execution
+        my_part = self.determine_my_contribution(task, collaborators)
+        result = self.execute_task_part(my_part)
+        
+        # Share results and wait for others
+        self.shared_memory.update(f"task_{task.id}", {
+            f"result_{self.agent_id}": result
+        })
+        
+        # Wait for all collaborators to complete
+        final_result = self.wait_for_completion(task.id, collaborators)
+        return final_result
+
+# Example: Research team system
+class ResearchTeam(MultiAgentSystem):
+    def __init__(self):
+        super().__init__()
+        
+        # Add specialized research agents
+        self.add_agent("data_collector", DataCollectorAgent())
+        self.add_agent("analyst", AnalystAgent())
+        self.add_agent("writer", WriterAgent())
+        self.add_agent("reviewer", ReviewerAgent())
+        
+    def conduct_research(self, topic):
+        """Coordinate research project across team"""
+        research_task = ResearchTask(topic)
+        
+        # Phase 1: Data collection
+        data = self.agents["data_collector"].collect_data(topic)
+        
+        # Phase 2: Analysis
+        analysis = self.agents["analyst"].analyze_data(data)
+        
+        # Phase 3: Writing
+        draft = self.agents["writer"].write_report(analysis)
+        
+        # Phase 4: Review and refinement
+        final_report = self.agents["reviewer"].review_and_improve(draft)
+        
+        return final_report
+
+# Usage example
+team = ResearchTeam()
+report = team.conduct_research("AI Agent Architectures")
+</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="communication-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Communication Protocols</h3>
+            <div class="communication-grid">
+                <div class="comm-card direct-card">
+                    <div class="comm-header">
+                        <div class="comm-icon direct-icon">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="comm-title">Direct Communication</div>
+                    </div>
+                    <div class="comm-desc">
+                        Point-to-point messaging between specific agents for targeted coordination and information exchange.
+                    </div>
+                    <ul class="comm-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Task delegation messages
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Status updates and progress reports
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Resource requests and responses
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Negotiation protocols
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="comm-card broadcast-card">
+                    <div class="comm-header">
+                        <div class="comm-icon broadcast-icon">
+                            <i class="fas fa-broadcast-tower"></i>
+                        </div>
+                        <div class="comm-title">Broadcast Communication</div>
+                    </div>
+                    <div class="comm-desc">
+                        One-to-many messaging for system-wide announcements, coordination signals, and shared state updates.
+                    </div>
+                    <ul class="comm-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            System-wide alerts and notifications
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Global state changes
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Coordination signals
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Emergency shutdown commands
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="comm-card mediated-card">
+                    <div class="comm-header">
+                        <div class="comm-icon mediated-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="comm-title">Mediated Communication</div>
+                    </div>
+                    <div class="comm-desc">
+                        Indirect communication through shared spaces, message queues, or coordination services.
+                    </div>
+                    <ul class="comm-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Shared blackboard systems
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Message queue systems
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Publish-subscribe patterns
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Coordination services
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="challenges-section">
+            <h3 class="text-xl font-bold mb-2">Implementation Challenges and Solutions</h3>
+            <div class="challenges-grid">
+                <div class="challenge-item">
+                    <div class="challenge-title">
+                        <i class="fas fa-sync-alt challenge-icon"></i>
+                        Coordination Complexity
+                    </div>
+                    <div class="challenge-desc">
+                        Managing coordination overhead and preventing deadlocks in complex multi-agent interactions.
+                    </div>
+                    <div class="solution-desc">
+                        Solution: Use hierarchical coordination, timeout mechanisms, and distributed consensus algorithms.
+                    </div>
+                </div>
+                <div class="challenge-item">
+                    <div class="challenge-title">
+                        <i class="fas fa-comments challenge-icon"></i>
+                        Communication Overhead
+                    </div>
+                    <div class="challenge-desc">
+                        Excessive messaging can overwhelm the system and reduce overall performance.
+                    </div>
+                    <div class="solution-desc">
+                        Solution: Implement message filtering, batching, and intelligent routing to optimize communication.
+                    </div>
+                </div>
+                <div class="challenge-item">
+                    <div class="challenge-title">
+                        <i class="fas fa-balance-scale challenge-icon"></i>
+                        Load Balancing
+                    </div>
+                    <div class="challenge-desc">
+                        Ensuring fair distribution of work and preventing agent overload or underutilization.
+                    </div>
+                    <div class="solution-desc">
+                        Solution: Use dynamic load balancing algorithms and capability-based task assignment.
+                    </div>
+                </div>
+                <div class="challenge-item">
+                    <div class="challenge-title">
+                        <i class="fas fa-shield-alt challenge-icon"></i>
+                        Fault Tolerance
+                    </div>
+                    <div class="challenge-desc">
+                        Handling agent failures gracefully without compromising the entire system operation.
+                    </div>
+                    <div class="solution-desc">
+                        Solution: Implement redundancy, health monitoring, and automatic failover mechanisms.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

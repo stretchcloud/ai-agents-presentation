@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #ef4444;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .emerging-overview {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .overview-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .overview-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .overview-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .swarm-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #8b5cf6;
+        }
+        .swarm-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .swarm-logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .swarm-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .swarm-subtitle {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+        .emerging-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .emerging-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid #ef4444;
+        }
+        .emerging-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .emerging-icon {
+            width: 24px;
+            height: 24px;
+            background: #ef4444;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 12px;
+        }
+        .emerging-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .emerging-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .trends-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .trends-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .trend-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .trend-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #06b6d4;
+            display: flex;
+            align-items: center;
+        }
+        .trend-icon {
+            margin-right: 8px;
+        }
+        .trend-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .trend-impact {
+            font-size: 11px;
+            color: #10b981;
+            font-weight: 600;
+        }
+        .code-example {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .code-content {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .code-header i {
+            color: #8b5cf6;
+        }
+        .code-body {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .future-outlook {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .outlook-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .outlook-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid #ef4444;
+        }
+        .outlook-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        .outlook-icon {
+            margin-right: 8px;
+            color: #ef4444;
+        }
+        .outlook-desc {
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">OpenAI Swarm and Emerging Frameworks</h1>
+            <p class="text-lg text-gray-600">Latest Developments and Future Trends in AI Agent Frameworks</p>
+        </div>
+        
+        <div class="emerging-overview">
+            <div class="overview-icon">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <div class="overview-content">
+                <h3>The Next Generation of Agent Frameworks</h3>
+                <p>
+                    Exploring cutting-edge frameworks and emerging trends that are shaping the future 
+                    of AI agent development, from OpenAI's experimental Swarm to innovative new approaches.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="swarm-section">
+                <div class="swarm-header">
+                    <div class="swarm-logo">SW</div>
+                    <div>
+                        <div class="swarm-title">OpenAI Swarm</div>
+                        <div class="swarm-subtitle">Experimental Multi-Agent Framework</div>
+                    </div>
+                </div>
+                <div style="color: #64748b; font-size: 14px; margin-bottom: 16px; line-height: 1.5;">
+                    OpenAI's lightweight, educational framework for multi-agent orchestration with 
+                    simple handoffs and minimal abstractions. Designed for experimentation and learning.
+                </div>
+                
+                <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 11px;">
+                        <div style="display: flex; justify-content: space-between; color: #64748b;">
+                            <span>GitHub Stars:</span>
+                            <span style="font-weight: 600; color: #1e293b;">12k+</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: #64748b;">
+                            <span>Release:</span>
+                            <span style="font-weight: 600; color: #1e293b;">Oct 2024</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: #64748b;">
+                            <span>Status:</span>
+                            <span style="font-weight: 600; color: #1e293b;">Experimental</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; color: #64748b;">
+                            <span>Language:</span>
+                            <span style="font-weight: 600; color: #1e293b;">Python</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <div style="font-weight: 600; color: #1e293b; margin-bottom: 12px; font-size: 14px;">Key Features</div>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 8px;">
+                        <div style="display: flex; align-items: flex-start; font-size: 12px; color: #475569;">
+                            <div style="width: 6px; height: 6px; background: #8b5cf6; border-radius: 50%; margin-right: 10px; margin-top: 6px; flex-shrink: 0;"></div>
+                            Lightweight agent handoffs with minimal overhead
+                        </div>
+                        <div style="display: flex; align-items: flex-start; font-size: 12px; color: #475569;">
+                            <div style="width: 6px; height: 6px; background: #8b5cf6; border-radius: 50%; margin-right: 10px; margin-top: 6px; flex-shrink: 0;"></div>
+                            Simple conversation flows and routing
+                        </div>
+                        <div style="display: flex; align-items: flex-start; font-size: 12px; color: #475569;">
+                            <div style="width: 6px; height: 6px; background: #8b5cf6; border-radius: 50%; margin-right: 10px; margin-top: 6px; flex-shrink: 0;"></div>
+                            Educational and experimental focus
+                        </div>
+                        <div style="display: flex; align-items: flex-start; font-size: 12px; color: #475569;">
+                            <div style="width: 6px; height: 6px; background: #8b5cf6; border-radius: 50%; margin-right: 10px; margin-top: 6px; flex-shrink: 0;"></div>
+                            Direct OpenAI API integration
+                        </div>
+                        <div style="display: flex; align-items: flex-start; font-size: 12px; color: #475569;">
+                            <div style="width: 6px; height: 6px; background: #8b5cf6; border-radius: 50%; margin-right: 10px; margin-top: 6px; flex-shrink: 0;"></div>
+                            Minimal abstraction for transparency
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="trends-section">
+                <h3 class="text-lg font-bold mb-4">Emerging Trends & Technologies</h3>
+                
+                <div class="trends-grid">
+                    <div class="trend-card">
+                        <div class="trend-title">
+                            <i class="fas fa-brain trend-icon"></i>
+                            Agentic AI Platforms
+                        </div>
+                        <div class="trend-desc">
+                            Comprehensive platforms that combine multiple AI capabilities with agent orchestration.
+                        </div>
+                        <div class="trend-impact">
+                            Impact: Simplified development, integrated toolchains
+                        </div>
+                    </div>
+                    
+                    <div class="trend-card">
+                        <div class="trend-title">
+                            <i class="fas fa-network-wired trend-icon"></i>
+                            Graph-Based Workflows
+                        </div>
+                        <div class="trend-desc">
+                            Advanced workflow orchestration using graph structures for complex agent interactions.
+                        </div>
+                        <div class="trend-impact">
+                            Impact: More sophisticated agent coordination patterns
+                        </div>
+                    </div>
+                    
+                    <div class="trend-card">
+                        <div class="trend-title">
+                            <i class="fas fa-cloud trend-icon"></i>
+                            Cloud-Native Agents
+                        </div>
+                        <div class="trend-desc">
+                            Frameworks designed specifically for cloud deployment and serverless architectures.
+                        </div>
+                        <div class="trend-impact">
+                            Impact: Scalable, cost-effective agent deployment
+                        </div>
+                    </div>
+                    
+                    <div class="trend-card">
+                        <div class="trend-title">
+                            <i class="fas fa-shield-alt trend-icon"></i>
+                            Security-First Frameworks
+                        </div>
+                        <div class="trend-desc">
+                            New frameworks prioritizing security, privacy, and compliance from the ground up.
+                        </div>
+                        <div class="trend-impact">
+                            Impact: Enterprise adoption, regulatory compliance
+                        </div>
+                    </div>
+                    
+                    <div class="trend-card">
+                        <div class="trend-title">
+                            <i class="fas fa-mobile-alt trend-icon"></i>
+                            Edge AI Agents
+                        </div>
+                        <div class="trend-desc">
+                            Frameworks optimized for edge computing and mobile device deployment.
+                        </div>
+                        <div class="trend-impact">
+                            Impact: Real-time processing, reduced latency
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="code-example">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">OpenAI Swarm Implementation Example</h3>
+            
+            <div class="code-content">
+                <div class="code-header">
+                    <div>
+                        <i class="fas fa-code"></i>
+                        OpenAI Swarm Agent Implementation
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.7;">Python + OpenAI Swarm</div>
+                </div>
+                <div class="code-body">
+<pre><code class="language-python">from swarm import Swarm, Agent
+import json
+
+# Initialize Swarm client
+client = Swarm()
+
+# Define specialized agents
+def transfer_to_sales():
+    """Transfer conversation to sales agent"""
+    return sales_agent
+
+def transfer_to_support():
+    """Transfer conversation to support agent"""
+    return support_agent
+
+def transfer_to_billing():
+    """Transfer conversation to billing agent"""
+    return billing_agent
+
+# Customer service triage agent
+triage_agent = Agent(
+    name="Triage Agent",
+    instructions="""You are a customer service triage agent. Your job is to understand 
+    the customer's needs and route them to the appropriate specialist agent.
+    
+    Available transfers:
+    - transfer_to_sales(): For new purchases, product inquiries, pricing
+    - transfer_to_support(): For technical issues, troubleshooting, how-to questions
+    - transfer_to_billing(): For billing questions, payment issues, account management
+    
+    Always be helpful and ask clarifying questions if the customer's needs are unclear.""",
+    functions=[transfer_to_sales, transfer_to_support, transfer_to_billing]
+)
+
+# Sales specialist agent
+sales_agent = Agent(
+    name="Sales Agent",
+    instructions="""You are a sales specialist. Help customers with:
+    - Product information and recommendations
+    - Pricing and package options
+    - Purchase decisions and comparisons
+    - Feature explanations
+    
+    Be knowledgeable, helpful, and focus on finding the right solution for the customer."""
+)
+
+# Technical support agent
+support_agent = Agent(
+    name="Support Agent", 
+    instructions="""You are a technical support specialist. Help customers with:
+    - Technical troubleshooting
+    - How-to guidance and tutorials
+    - Bug reports and issue resolution
+    - Configuration and setup assistance
+    
+    Be patient, thorough, and provide step-by-step guidance."""
+)
+
+# Billing support agent
+billing_agent = Agent(
+    name="Billing Agent",
+    instructions="""You are a billing specialist. Help customers with:
+    - Payment processing and methods
+    - Billing inquiries and disputes
+    - Account management and changes
+    - Subscription modifications
+    
+    Be accurate, secure, and handle sensitive information appropriately."""
+)
+
+# Advanced Swarm implementation with context management
+class CustomerServiceSwarm:
+    def __init__(self):
+        self.client = Swarm()
+        self.conversation_history = {}
+        self.agents = {
+            'triage': triage_agent,
+            'sales': sales_agent,
+            'support': support_agent,
+            'billing': billing_agent
+        }
+    
+    def handle_customer_request(self, customer_id: str, message: str):
+        """Handle a customer request with context management"""
+        
+        # Get or create conversation history
+        if customer_id not in self.conversation_history:
+            self.conversation_history[customer_id] = {
+                'messages': [],
+                'current_agent': 'triage',
+                'context': {}
+            }
+        
+        history = self.conversation_history[customer_id]
+        
+        # Add customer message to history
+        history['messages'].append({
+            "role": "user",
+            "content": message
+        })
+        
+        # Run the conversation
+        response = self.client.run(
+            agent=self.agents[history['current_agent']],
+            messages=history['messages']
+        )
+        
+        # Update conversation history
+        history['messages'].extend(response.messages)
+        
+        # Check if agent was transferred
+        if response.agent != self.agents[history['current_agent']]:
+            # Update current agent
+            for agent_name, agent in self.agents.items():
+                if agent == response.agent:
+                    history['current_agent'] = agent_name
+                    break
+        
+        return {
+            'response': response.messages[-1]['content'],
+            'current_agent': history['current_agent'],
+            'conversation_id': customer_id
+        }
+    
+    def get_conversation_summary(self, customer_id: str):
+        """Get a summary of the customer conversation"""
+        if customer_id not in self.conversation_history:
+            return "No conversation history found"
+        
+        history = self.conversation_history[customer_id]
+        
+        # Create summary using the triage agent
+        summary_prompt = f"""Please provide a brief summary of this customer conversation:
+        
+        Messages: {json.dumps(history['messages'], indent=2)}
+        
+        Include:
+        - Customer's main issue or request
+        - Actions taken
+        - Current status
+        - Any follow-up needed
+        """
+        
+        response = self.client.run(
+            agent=triage_agent,
+            messages=[{"role": "user", "content": summary_prompt}]
+        )
+        
+        return response.messages[-1]['content']
+
+# Usage example
+def main():
+    # Initialize customer service system
+    cs_system = CustomerServiceSwarm()
+    
+    # Simulate customer interactions
+    customer_id = "customer_123"
+    
+    # Customer inquiry
+    response1 = cs_system.handle_customer_request(
+        customer_id, 
+        "Hi, I'm interested in your premium plan. Can you tell me about the features?"
+    )
+    print(f"Agent: {response1['current_agent']}")
+    print(f"Response: {response1['response']}")
+    
+    # Follow-up question
+    response2 = cs_system.handle_customer_request(
+        customer_id,
+        "What's the pricing for the premium plan?"
+    )
+    print(f"Agent: {response2['current_agent']}")
+    print(f"Response: {response2['response']}")
+    
+    # Get conversation summary
+    summary = cs_system.get_conversation_summary(customer_id)
+    print(f"Conversation Summary: {summary}")
+
+# Advanced patterns with Swarm
+class MultiModalSwarm:
+    """Advanced Swarm implementation with multi-modal capabilities"""
+    
+    def __init__(self):
+        self.client = Swarm()
+        self.setup_agents()
+    
+    def setup_agents(self):
+        """Setup specialized agents for different modalities"""
+        
+        def transfer_to_image_agent():
+            return self.image_agent
+        
+        def transfer_to_text_agent():
+            return self.text_agent
+        
+        def transfer_to_code_agent():
+            return self.code_agent
+        
+        # Router agent
+        self.router_agent = Agent(
+            name="Router",
+            instructions="""You route requests to specialized agents based on content type:
+            - transfer_to_image_agent(): For image analysis, generation, or processing
+            - transfer_to_text_agent(): For text analysis, writing, or content creation
+            - transfer_to_code_agent(): For code generation, debugging, or technical tasks""",
+            functions=[transfer_to_image_agent, transfer_to_text_agent, transfer_to_code_agent]
+        )
+        
+        # Specialized agents
+        self.image_agent = Agent(
+            name="Image Specialist",
+            instructions="You specialize in image analysis, generation, and processing tasks."
+        )
+        
+        self.text_agent = Agent(
+            name="Text Specialist", 
+            instructions="You specialize in text analysis, writing, and content creation."
+        )
+        
+        self.code_agent = Agent(
+            name="Code Specialist",
+            instructions="You specialize in code generation, debugging, and technical tasks."
+        )
+    
+    def process_request(self, request: str, request_type: str = "auto"):
+        """Process a multi-modal request"""
+        
+        if request_type == "auto":
+            # Use router to determine appropriate agent
+            response = self.client.run(
+                agent=self.router_agent,
+                messages=[{"role": "user", "content": request}]
+            )
+        else:
+            # Direct routing based on request type
+            agent_map = {
+                "image": self.image_agent,
+                "text": self.text_agent,
+                "code": self.code_agent
+            }
+            
+            response = self.client.run(
+                agent=agent_map.get(request_type, self.router_agent),
+                messages=[{"role": "user", "content": request}]
+            )
+        
+        return response
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="future-outlook">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Future Outlook & Predictions</h3>
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                <strong>Market Evolution:</strong> The AI agent framework landscape is rapidly consolidating around 
+                key players while new specialized frameworks emerge for specific use cases and industries.
+            </div>
+            <div class="outlook-grid">
+                <div class="outlook-card">
+                    <div class="outlook-title">
+                        <i class="fas fa-chart-line outlook-icon"></i>
+                        Market Consolidation
+                    </div>
+                    <div class="outlook-desc">
+                        Expect consolidation around 3-5 major frameworks with specialized tools for niche use cases. 
+                        LangChain likely to remain dominant.
+                    </div>
+                </div>
+                <div class="outlook-card">
+                    <div class="outlook-title">
+                        <i class="fas fa-cogs outlook-icon"></i>
+                        Standardization
+                    </div>
+                    <div class="outlook-desc">
+                        Industry standards for agent communication, tool interfaces, and deployment patterns 
+                        will emerge to improve interoperability.
+                    </div>
+                </div>
+                <div class="outlook-card">
+                    <div class="outlook-title">
+                        <i class="fas fa-rocket outlook-icon"></i>
+                        Enterprise Focus
+                    </div>
+                    <div class="outlook-desc">
+                        Increased focus on enterprise features: security, compliance, monitoring, 
+                        and integration with existing business systems.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

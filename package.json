@@ -1,0 +1,46 @@
+{
+  "name": "ai-agents-presentation",
+  "version": "1.0.0",
+  "description": "A comprehensive technical presentation covering AI agent architecture, implementation, and practical applications for software developers",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve . -p 8000",
+    "dev": "npx serve . -p 8000 --live",
+    "build": "echo 'No build step required for static site'",
+    "test": "echo 'No tests specified'",
+    "lint": "echo 'No linting configured'",
+    "deploy": "echo 'Deploy to your preferred hosting platform'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/ai-agents-presentation.git"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "artificial-intelligence",
+    "machine-learning",
+    "presentation",
+    "education",
+    "software-development",
+    "langchain",
+    "autogen",
+    "crewai",
+    "react-pattern",
+    "multi-agent-systems",
+    "technical-documentation"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/ai-agents-presentation/issues"
+  },
+  "homepage": "https://github.com/yourusername/ai-agents-presentation#readme",
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
+

@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .landscape-overview {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .landscape-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .landscape-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .landscape-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .framework-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .framework-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .framework-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .langchain-card { border-top-color: #10b981; }
+        .autogen-card { border-top-color: #3b82f6; }
+        .crewai-card { border-top-color: #f59e0b; }
+        .swarm-card { border-top-color: #8b5cf6; }
+        
+        .framework-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .framework-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .langchain-logo { background: linear-gradient(135deg, #10b981, #059669); }
+        .autogen-logo { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .crewai-logo { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .swarm-logo { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        
+        .framework-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .framework-subtitle {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        .framework-description {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+        .framework-features {
+            margin-bottom: 16px;
+        }
+        .features-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .feature-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .langchain-bullet { background: #10b981; }
+        .autogen-bullet { background: #3b82f6; }
+        .crewai-bullet { background: #f59e0b; }
+        .swarm-bullet { background: #8b5cf6; }
+        
+        .framework-stats {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 11px;
+        }
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            color: #64748b;
+        }
+        .stat-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .framework-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .framework-tag {
+            background: #e2e8f0;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 10px;
+            color: #475569;
+            font-weight: 500;
+        }
+        .popularity-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .high-popularity { color: #dc2626; }
+        .medium-popularity { color: #d97706; }
+        .emerging-popularity { color: #16a34a; }
+        
+        .comparison-matrix {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        .matrix-table th {
+            background: #f8fafc;
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .matrix-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+            vertical-align: top;
+        }
+        .matrix-table tr:hover {
+            background: #f8fafc;
+        }
+        .rating-stars {
+            display: flex;
+            gap: 2px;
+        }
+        .star {
+            width: 12px;
+            height: 12px;
+            color: #fbbf24;
+        }
+        .star.filled {
+            color: #f59e0b;
+        }
+        .star.empty {
+            color: #e5e7eb;
+        }
+        .selection-guide {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 25px;
+        }
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .guide-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .guide-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #06b6d4;
+            display: flex;
+            align-items: center;
+        }
+        .guide-icon {
+            margin-right: 8px;
+        }
+        .guide-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .guide-recommendation {
+            font-size: 11px;
+            color: #10b981;
+            font-weight: 600;
+        }
+        .ecosystem-overview {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .ecosystem-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Framework Landscape Overview</h1>
+            <p class="text-lg text-gray-600">Comprehensive Comparison of AI Agent Development Frameworks</p>
+        </div>
+        
+        <div class="landscape-overview">
+            <div class="landscape-icon">
+                <i class="fas fa-map"></i>
+            </div>
+            <div class="landscape-content">
+                <h3>The AI Agent Framework Ecosystem</h3>
+                <p>
+                    A rapidly evolving landscape of tools and frameworks designed to simplify AI agent development, 
+                    each with unique strengths, architectural approaches, and target use cases.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div>
+                <h3 class="text-lg font-bold mb-4 text-gray-800">Major Frameworks</h3>
+                <div class="framework-grid">
+                    <div class="framework-card langchain-card">
+                        <div class="popularity-indicator high-popularity">Most Popular</div>
+                        <div class="framework-header">
+                            <div class="framework-logo langchain-logo">LC</div>
+                            <div>
+                                <div class="framework-title">LangChain</div>
+                                <div class="framework-subtitle">Comprehensive AI Application Framework</div>
+                            </div>
+                        </div>
+                        <div class="framework-description">
+                            The most mature and widely-adopted framework for building LLM applications with extensive 
+                            tool integration, memory management, and agent orchestration capabilities.
+                        </div>
+                        
+                        <div class="framework-stats">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span>GitHub Stars:</span>
+                                    <span class="stat-value">85k+</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Contributors:</span>
+                                    <span class="stat-value">2000+</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>First Release:</span>
+                                    <span class="stat-value">2022</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Language:</span>
+                                    <span class="stat-value">Python/JS</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="framework-features">
+                            <div class="features-title">Key Features</div>
+                            <ul class="features-list">
+                                <li class="feature-item">
+                                    <div class="feature-bullet langchain-bullet"></div>
+                                    Extensive tool and API integrations
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet langchain-bullet"></div>
+                                    Advanced memory management systems
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet langchain-bullet"></div>
+                                    Chain-based workflow orchestration
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet langchain-bullet"></div>
+                                    Multi-modal document processing
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet langchain-bullet"></div>
+                                    Production-ready deployment tools
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="framework-tags">
+                            <span class="framework-tag">Enterprise</span>
+                            <span class="framework-tag">RAG</span>
+                            <span class="framework-tag">Agents</span>
+                            <span class="framework-tag">Tools</span>
+                        </div>
+                    </div>
+                    
+                    <div class="framework-card autogen-card">
+                        <div class="popularity-indicator medium-popularity">Growing Fast</div>
+                        <div class="framework-header">
+                            <div class="framework-logo autogen-logo">AG</div>
+                            <div>
+                                <div class="framework-title">AutoGen</div>
+                                <div class="framework-subtitle">Multi-Agent Conversation Framework</div>
+                            </div>
+                        </div>
+                        <div class="framework-description">
+                            Microsoft's framework focused on multi-agent conversations and collaborative problem-solving 
+                            with sophisticated agent interaction patterns and code generation capabilities.
+                        </div>
+                        
+                        <div class="framework-stats">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span>GitHub Stars:</span>
+                                    <span class="stat-value">25k+</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Contributors:</span>
+                                    <span class="stat-value">300+</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>First Release:</span>
+                                    <span class="stat-value">2023</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Language:</span>
+                                    <span class="stat-value">Python</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="framework-features">
+                            <div class="features-title">Key Features</div>
+                            <ul class="features-list">
+                                <li class="feature-item">
+                                    <div class="feature-bullet autogen-bullet"></div>
+                                    Multi-agent conversation orchestration
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet autogen-bullet"></div>
+                                    Code generation and execution
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet autogen-bullet"></div>
+                                    Human-in-the-loop integration
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet autogen-bullet"></div>
+                                    Flexible agent role definitions
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet autogen-bullet"></div>
+                                    Advanced conversation patterns
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="framework-tags">
+                            <span class="framework-tag">Multi-Agent</span>
+                            <span class="framework-tag">Code Gen</span>
+                            <span class="framework-tag">Microsoft</span>
+                            <span class="framework-tag">Research</span>
+                        </div>
+                    </div>
+                    
+                    <div class="framework-card crewai-card">
+                        <div class="popularity-indicator medium-popularity">Specialized</div>
+                        <div class="framework-header">
+                            <div class="framework-logo crewai-logo">CA</div>
+                            <div>
+                                <div class="framework-title">CrewAI</div>
+                                <div class="framework-subtitle">Role-Based Multi-Agent Framework</div>
+                            </div>
+                        </div>
+                        <div class="framework-description">
+                            Specialized framework for creating teams of AI agents with defined roles, responsibilities, 
+                            and collaborative workflows for complex task execution.
+                        </div>
+                        
+                        <div class="framework-stats">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span>GitHub Stars:</span>
+                                    <span class="stat-value">15k+</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Contributors:</span>
+                                    <span class="stat-value">150+</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>First Release:</span>
+                                    <span class="stat-value">2023</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Language:</span>
+                                    <span class="stat-value">Python</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="framework-features">
+                            <div class="features-title">Key Features</div>
+                            <ul class="features-list">
+                                <li class="feature-item">
+                                    <div class="feature-bullet crewai-bullet"></div>
+                                    Role-based agent specialization
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet crewai-bullet"></div>
+                                    Hierarchical task delegation
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet crewai-bullet"></div>
+                                    Process-driven workflows
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet crewai-bullet"></div>
+                                    Built-in collaboration patterns
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet crewai-bullet"></div>
+                                    Task result validation
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="framework-tags">
+                            <span class="framework-tag">Teams</span>
+                            <span class="framework-tag">Roles</span>
+                            <span class="framework-tag">Workflows</span>
+                            <span class="framework-tag">Business</span>
+                        </div>
+                    </div>
+                    
+                    <div class="framework-card swarm-card">
+                        <div class="popularity-indicator emerging-popularity">Emerging</div>
+                        <div class="framework-header">
+                            <div class="framework-logo swarm-logo">SW</div>
+                            <div>
+                                <div class="framework-title">OpenAI Swarm</div>
+                                <div class="framework-subtitle">Lightweight Agent Orchestration</div>
+                            </div>
+                        </div>
+                        <div class="framework-description">
+                            OpenAI's experimental framework for lightweight, educational multi-agent orchestration 
+                            with simple handoffs and minimal abstractions.
+                        </div>
+                        
+                        <div class="framework-stats">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span>GitHub Stars:</span>
+                                    <span class="stat-value">12k+</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Contributors:</span>
+                                    <span class="stat-value">50+</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>First Release:</span>
+                                    <span class="stat-value">2024</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Language:</span>
+                                    <span class="stat-value">Python</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="framework-features">
+                            <div class="features-title">Key Features</div>
+                            <ul class="features-list">
+                                <li class="feature-item">
+                                    <div class="feature-bullet swarm-bullet"></div>
+                                    Lightweight agent handoffs
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet swarm-bullet"></div>
+                                    Minimal abstraction overhead
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet swarm-bullet"></div>
+                                    Educational and experimental
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet swarm-bullet"></div>
+                                    OpenAI API integration
+                                </li>
+                                <li class="feature-item">
+                                    <div class="feature-bullet swarm-bullet"></div>
+                                    Simple conversation flows
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="framework-tags">
+                            <span class="framework-tag">Experimental</span>
+                            <span class="framework-tag">OpenAI</span>
+                            <span class="framework-tag">Simple</span>
+                            <span class="framework-tag">Educational</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-matrix">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">Feature Comparison</h3>
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>LangChain</th>
+                            <th>AutoGen</th>
+                            <th>CrewAI</th>
+                            <th>Swarm</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Learning Curve</strong></td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Moderate
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                </div>
+                                Steep
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Moderate
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Easy
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Multi-Agent Support</strong></td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                </div>
+                                Excellent
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                </div>
+                                Excellent
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                </div>
+                                Excellent
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Good
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tool Integration</strong></td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                </div>
+                                Extensive
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Good
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Good
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Basic
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Production Ready</strong></td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                </div>
+                                Yes
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Mostly
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Mostly
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Experimental
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Community Size</strong></td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                </div>
+                                Large
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Growing
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Medium
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Small
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Documentation</strong></td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                </div>
+                                Comprehensive
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Good
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Good
+                            </td>
+                            <td>
+                                <div class="rating-stars">
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star filled"></i>
+                                    <i class="fas fa-star star empty"></i>
+                                </div>
+                                Basic
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="selection-guide">
+            <h3 class="text-xl font-bold mb-2">Framework Selection Guide</h3>
+            <div class="guide-grid">
+                <div class="guide-card">
+                    <div class="guide-title">
+                        <i class="fas fa-building guide-icon"></i>
+                        Enterprise Applications
+                    </div>
+                    <div class="guide-desc">
+                        Large-scale, production-ready applications with complex requirements and extensive integrations.
+                    </div>
+                    <div class="guide-recommendation">
+                        Recommended: LangChain + LangGraph for comprehensive tooling and enterprise features
+                    </div>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-title">
+                        <i class="fas fa-users guide-icon"></i>
+                        Multi-Agent Systems
+                    </div>
+                    <div class="guide-desc">
+                        Applications requiring sophisticated agent collaboration and conversation patterns.
+                    </div>
+                    <div class="guide-recommendation">
+                        Recommended: AutoGen for research/experimentation, CrewAI for business workflows
+                    </div>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-title">
+                        <i class="fas fa-graduation-cap guide-icon"></i>
+                        Learning & Prototyping
+                    </div>
+                    <div class="guide-desc">
+                        Educational projects, proof-of-concepts, and rapid prototyping with minimal complexity.
+                    </div>
+                    <div class="guide-recommendation">
+                        Recommended: OpenAI Swarm for simplicity, LangChain for comprehensive learning
+                    </div>
+                </div>
+                <div class="guide-card">
+                    <div class="guide-title">
+                        <i class="fas fa-rocket guide-icon"></i>
+                        Specialized Workflows
+                    </div>
+                    <div class="guide-desc">
+                        Domain-specific applications with well-defined roles and structured processes.
+                    </div>
+                    <div class="guide-recommendation">
+                        Recommended: CrewAI for role-based teams, AutoGen for code generation tasks
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ecosystem-overview">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Ecosystem Statistics</h3>
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                <strong>Market Trends:</strong> The AI agent framework space is rapidly evolving with new entrants, 
+                consolidation around key players, and increasing focus on production-ready solutions.
+            </div>
+            <div class="ecosystem-stats">
+                <div class="stat-card">
+                    <div class="stat-number">150k+</div>
+                    <div class="stat-label">Total GitHub Stars</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">2500+</div>
+                    <div class="stat-label">Active Contributors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Major Frameworks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-label">Python-based</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

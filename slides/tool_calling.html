@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #f59e0b;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .tool-overview {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .tool-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .tool-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .tool-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .architecture-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .tool-flow {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid #f59e0b;
+        }
+        .flow-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 16px 0;
+            position: relative;
+        }
+        .flow-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #f59e0b, #10b981, #3b82f6);
+            z-index: 0;
+        }
+        .flow-step {
+            background: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+            border: 2px solid #f59e0b;
+        }
+        .step-icon {
+            font-size: 12px;
+            color: #f59e0b;
+            margin-bottom: 2px;
+        }
+        .step-label {
+            font-size: 8px;
+            font-weight: 600;
+            color: #1e293b;
+            text-align: center;
+        }
+        .code-section {
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .code-header i {
+            margin-right: 8px;
+            color: #f59e0b;
+        }
+        .code-content {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .integration-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .integration-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .integration-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid;
+        }
+        .api-card { border-top-color: #3b82f6; }
+        .database-card { border-top-color: #10b981; }
+        .external-card { border-top-color: #8b5cf6; }
+        
+        .integration-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .integration-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .api-icon { background: #3b82f6; }
+        .database-icon { background: #10b981; }
+        .external-icon { background: #8b5cf6; }
+        
+        .integration-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .integration-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .integration-examples {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .example-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #475569;
+        }
+        .example-bullet {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .security-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .security-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .security-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+        }
+        .security-icon {
+            margin-right: 8px;
+        }
+        .security-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .mitigation-desc {
+            font-size: 11px;
+            opacity: 0.7;
+            color: #06b6d4;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Tool Calling and External Integration</h1>
+            <p class="text-lg text-gray-600">Extending Agent Capabilities Through External APIs and Services</p>
+        </div>
+        
+        <div class="tool-overview">
+            <div class="tool-icon">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="tool-content">
+                <h3>External Tool Integration</h3>
+                <p>
+                    Tool calling enables AI agents to interact with external APIs, databases, and services, 
+                    dramatically expanding their capabilities beyond text generation to real-world actions.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="architecture-section">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">Tool Calling Architecture</h3>
+                
+                <div class="tool-flow">
+                    <strong>Tool Execution Flow:</strong><br>
+                    Intent Recognition → Tool Selection → Parameter Extraction → Execution → Result Integration
+                </div>
+                
+                <div class="flow-steps">
+                    <div class="flow-line"></div>
+                    
+                    <div class="flow-step">
+                        <div class="step-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div class="step-label">Analyze</div>
+                    </div>
+                    
+                    <div class="flow-step">
+                        <div class="step-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="step-label">Select</div>
+                    </div>
+                    
+                    <div class="flow-step">
+                        <div class="step-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="step-label">Execute</div>
+                    </div>
+                    
+                    <div class="flow-step">
+                        <div class="step-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="step-label">Integrate</div>
+                    </div>
+                </div>
+                
+                <div style="background: #f1f5f9; border-radius: 8px; padding: 12px; margin-top: 16px;">
+                    <strong>Key Components:</strong>
+                    <ul style="list-style: none; padding: 0; margin: 8px 0 0 0;">
+                        <li style="display: flex; align-items: center; margin-bottom: 4px; font-size: 12px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; margin-right: 8px;"></div>
+                            Tool Registry and Discovery
+                        </li>
+                        <li style="display: flex; align-items: center; margin-bottom: 4px; font-size: 12px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; margin-right: 8px;"></div>
+                            Parameter Validation and Mapping
+                        </li>
+                        <li style="display: flex; align-items: center; margin-bottom: 4px; font-size: 12px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; margin-right: 8px;"></div>
+                            Execution Engine and Error Handling
+                        </li>
+                        <li style="display: flex; align-items: center; margin-bottom: 4px; font-size: 12px;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; margin-right: 8px;"></div>
+                            Result Processing and Integration
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <i class="fas fa-code"></i>
+                    Tool Implementation Example
+                </div>
+                <div class="code-content">
+<pre><code class="language-python">from langchain.tools import BaseTool
+from typing import Optional, Type
+from pydantic import BaseModel, Field
+
+class CalculatorInput(BaseModel):
+    expression: str = Field(description="Mathematical expression to evaluate")
+
+class CalculatorTool(BaseTool):
+    name = "calculator"
+    description = "Useful for mathematical calculations"
+    args_schema: Type[BaseModel] = CalculatorInput
+    
+    def _run(self, expression: str) -> str:
+        try:
+            # Safe evaluation of mathematical expressions
+            result = eval(expression, {"__builtins__": {}}, {})
+            return f"Result: {result}"
+        except Exception as e:
+            return f"Error: {str(e)}"
+    
+    async def _arun(self, expression: str) -> str:
+        return self._run(expression)
+
+class DatabaseQueryTool(BaseTool):
+    name = "database_query"
+    description = "Query database for information"
+    
+    def __init__(self, connection_string: str):
+        super().__init__()
+        self.db = Database(connection_string)
+    
+    def _run(self, query: str) -> str:
+        try:
+            # Validate query for safety
+            if not self.is_safe_query(query):
+                return "Error: Unsafe query detected"
+            
+            results = self.db.execute(query)
+            return self.format_results(results)
+        except Exception as e:
+            return f"Database error: {str(e)}"
+    
+    def is_safe_query(self, query: str) -> bool:
+        # Implement query validation logic
+        forbidden_keywords = ['DROP', 'DELETE', 'UPDATE', 'INSERT']
+        return not any(keyword in query.upper() for keyword in forbidden_keywords)
+
+class APICallTool(BaseTool):
+    name = "api_call"
+    description = "Make HTTP API calls to external services"
+    
+    def __init__(self, base_url: str, api_key: str):
+        super().__init__()
+        self.base_url = base_url
+        self.api_key = api_key
+        self.session = requests.Session()
+        self.session.headers.update({"Authorization": f"Bearer {api_key}"})
+    
+    def _run(self, endpoint: str, method: str = "GET", data: dict = None) -> str:
+        try:
+            url = f"{self.base_url}/{endpoint}"
+            
+            # Rate limiting
+            if not self.check_rate_limit():
+                return "Error: Rate limit exceeded"
+            
+            response = self.session.request(method, url, json=data)
+            response.raise_for_status()
+            
+            return json.dumps(response.json(), indent=2)
+        except Exception as e:
+            return f"API error: {str(e)}"
+    
+    def check_rate_limit(self) -> bool:
+        # Implement rate limiting logic
+        return True
+
+# Tool orchestration with LangChain
+from langchain.agents import create_tool_calling_agent, AgentExecutor
+from langchain_openai import ChatOpenAI
+
+def create_agent_with_tools():
+    # Initialize LLM
+    llm = ChatOpenAI(model="gpt-4", temperature=0)
+    
+    # Create tools
+    tools = [
+        CalculatorTool(),
+        DatabaseQueryTool("postgresql://localhost/mydb"),
+        APICallTool("https://api.example.com", "your-api-key"),
+        # Add more tools as needed
+    ]
+    
+    # Create agent
+    agent = create_tool_calling_agent(llm, tools, prompt_template)
+    
+    # Create executor with error handling
+    agent_executor = AgentExecutor(
+        agent=agent,
+        tools=tools,
+        verbose=True,
+        max_iterations=10,
+        handle_parsing_errors=True
+    )
+    
+    return agent_executor
+
+# Usage example
+agent = create_agent_with_tools()
+result = agent.invoke({
+    "input": "Calculate the square root of 144 and then query the database for users with that ID"
+})
+</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="integration-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Integration Patterns</h3>
+            <div class="integration-grid">
+                <div class="integration-card api-card">
+                    <div class="integration-header">
+                        <div class="integration-icon api-icon">
+                            <i class="fas fa-plug"></i>
+                        </div>
+                        <div class="integration-title">REST API Integration</div>
+                    </div>
+                    <div class="integration-desc">
+                        Connect to external web services and APIs for data retrieval, processing, and actions.
+                    </div>
+                    <ul class="integration-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Weather and location services
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Payment processing APIs
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Social media platforms
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Cloud service providers
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="integration-card database-card">
+                    <div class="integration-header">
+                        <div class="integration-icon database-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="integration-title">Database Operations</div>
+                    </div>
+                    <div class="integration-desc">
+                        Direct database access for querying, updating, and managing structured data storage.
+                    </div>
+                    <ul class="integration-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            SQL query execution
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            NoSQL document operations
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Vector database searches
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Cache management
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="integration-card external-card">
+                    <div class="integration-header">
+                        <div class="integration-icon external-icon">
+                            <i class="fas fa-external-link-alt"></i>
+                        </div>
+                        <div class="integration-title">System Integration</div>
+                    </div>
+                    <div class="integration-desc">
+                        Integration with operating system, file systems, and local applications for comprehensive automation.
+                    </div>
+                    <ul class="integration-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            File system operations
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Shell command execution
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Email and messaging
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Browser automation
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="security-section">
+            <h3 class="text-xl font-bold mb-2">Security Considerations and Best Practices</h3>
+            <div class="security-grid">
+                <div class="security-item">
+                    <div class="security-title">
+                        <i class="fas fa-shield-alt security-icon"></i>
+                        Input Validation
+                    </div>
+                    <div class="security-desc">
+                        Validate and sanitize all inputs before passing to external tools to prevent injection attacks.
+                    </div>
+                    <div class="mitigation-desc">
+                        Implement strict parameter validation, type checking, and input sanitization for all tool calls.
+                    </div>
+                </div>
+                <div class="security-item">
+                    <div class="security-title">
+                        <i class="fas fa-key security-icon"></i>
+                        Authentication & Authorization
+                    </div>
+                    <div class="security-desc">
+                        Secure API keys and credentials, implement proper authentication for all external service calls.
+                    </div>
+                    <div class="mitigation-desc">
+                        Use environment variables, secret management systems, and principle of least privilege access.
+                    </div>
+                </div>
+                <div class="security-item">
+                    <div class="security-title">
+                        <i class="fas fa-clock security-icon"></i>
+                        Rate Limiting
+                    </div>
+                    <div class="security-desc">
+                        Prevent abuse and manage costs by implementing rate limiting for external API calls.
+                    </div>
+                    <div class="mitigation-desc">
+                        Implement token bucket algorithms, request queuing, and intelligent retry mechanisms.
+                    </div>
+                </div>
+                <div class="security-item">
+                    <div class="security-title">
+                        <i class="fas fa-exclamation-triangle security-icon"></i>
+                        Error Handling
+                    </div>
+                    <div class="security-desc">
+                        Graceful error handling to prevent information leakage and maintain system stability.
+                    </div>
+                    <div class="mitigation-desc">
+                        Implement comprehensive error handling, logging, and fallback mechanisms for tool failures.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

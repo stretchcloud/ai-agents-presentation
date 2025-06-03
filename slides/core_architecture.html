@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .architecture-overview {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .architecture-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .architecture-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .architecture-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .architecture-diagram {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .diagram-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            min-height: 300px;
+        }
+        .layer {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px 0;
+            border-left: 4px solid;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .presentation-layer { border-left-color: #3b82f6; }
+        .business-layer { border-left-color: #10b981; }
+        .data-layer { border-left-color: #f59e0b; }
+        .infrastructure-layer { border-left-color: #ef4444; }
+        
+        .layer-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .layer-icon {
+            margin-right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        .presentation-icon { background: #3b82f6; }
+        .business-icon { background: #10b981; }
+        .data-icon { background: #f59e0b; }
+        .infrastructure-icon { background: #ef4444; }
+        
+        .layer-components {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .component-tag {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 11px;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        .data-flow {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 16px;
+        }
+        .component-details {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .component-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid;
+        }
+        .perception-card { border-top-color: #3b82f6; }
+        .reasoning-card { border-top-color: #10b981; }
+        .memory-card { border-top-color: #f59e0b; }
+        .action-card { border-top-color: #ef4444; }
+        
+        .component-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .component-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .perception-icon { background: #3b82f6; }
+        .reasoning-icon { background: #10b981; }
+        .memory-icon { background: #f59e0b; }
+        .action-icon { background: #ef4444; }
+        
+        .component-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .component-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .component-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #475569;
+        }
+        .feature-bullet {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .implementation-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .code-section {
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .code-header i {
+            margin-right: 8px;
+            color: #3b82f6;
+        }
+        .code-content {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .patterns-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .pattern-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .pattern-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #06b6d4;
+            display: flex;
+            align-items: center;
+        }
+        .pattern-icon {
+            margin-right: 8px;
+        }
+        .pattern-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .pattern-benefits {
+            font-size: 11px;
+            opacity: 0.7;
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Core Agent Architecture</h1>
+            <p class="text-lg text-gray-600">Technical Overview of System Components and Data Flow</p>
+        </div>
+        
+        <div class="architecture-overview">
+            <div class="architecture-icon">
+                <i class="fas fa-sitemap"></i>
+            </div>
+            <div class="architecture-content">
+                <h3>Layered Architecture Design</h3>
+                <p>
+                    AI agents follow a layered architecture pattern that separates concerns and enables 
+                    modular development, testing, and maintenance of complex autonomous systems.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="architecture-diagram">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">System Architecture Layers</h3>
+                
+                <div class="diagram-container">
+                    <div class="layer presentation-layer">
+                        <div class="layer-title">
+                            <div class="layer-icon presentation-icon">
+                                <i class="fas fa-desktop"></i>
+                            </div>
+                            Presentation Layer
+                        </div>
+                        <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">
+                            User interfaces, APIs, and communication protocols
+                        </div>
+                        <div class="layer-components">
+                            <span class="component-tag">REST APIs</span>
+                            <span class="component-tag">WebSocket</span>
+                            <span class="component-tag">Chat Interface</span>
+                            <span class="component-tag">CLI Tools</span>
+                        </div>
+                        <div class="data-flow">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="layer business-layer">
+                        <div class="layer-title">
+                            <div class="layer-icon business-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            Business Logic Layer
+                        </div>
+                        <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">
+                            Core agent intelligence, reasoning, and decision-making
+                        </div>
+                        <div class="layer-components">
+                            <span class="component-tag">Planning Engine</span>
+                            <span class="component-tag">Reasoning Module</span>
+                            <span class="component-tag">Tool Orchestrator</span>
+                            <span class="component-tag">Goal Manager</span>
+                        </div>
+                        <div class="data-flow">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="layer data-layer">
+                        <div class="layer-title">
+                            <div class="layer-icon data-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            Data Access Layer
+                        </div>
+                        <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">
+                            Memory management, knowledge bases, and data persistence
+                        </div>
+                        <div class="layer-components">
+                            <span class="component-tag">Vector Store</span>
+                            <span class="component-tag">Knowledge Graph</span>
+                            <span class="component-tag">Session Store</span>
+                            <span class="component-tag">Cache Layer</span>
+                        </div>
+                        <div class="data-flow">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="layer infrastructure-layer">
+                        <div class="layer-title">
+                            <div class="layer-icon infrastructure-icon">
+                                <i class="fas fa-server"></i>
+                            </div>
+                            Infrastructure Layer
+                        </div>
+                        <div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">
+                            External services, tools, and system integrations
+                        </div>
+                        <div class="layer-components">
+                            <span class="component-tag">LLM APIs</span>
+                            <span class="component-tag">External Tools</span>
+                            <span class="component-tag">Databases</span>
+                            <span class="component-tag">Message Queues</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component-details">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">Core Components</h3>
+                
+                <div class="component-grid">
+                    <div class="component-card perception-card">
+                        <div class="component-header">
+                            <div class="component-icon perception-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="component-title">Perception Module</div>
+                        </div>
+                        <div class="component-desc">
+                            Processes and interprets input from various sources including text, images, and sensor data.
+                        </div>
+                        <ul class="component-features">
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Natural language understanding
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Multi-modal input processing
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Context extraction and parsing
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Intent and entity recognition
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="component-card reasoning-card">
+                        <div class="component-header">
+                            <div class="component-icon reasoning-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="component-title">Reasoning Engine</div>
+                        </div>
+                        <div class="component-desc">
+                            Core decision-making system that processes information and determines appropriate actions.
+                        </div>
+                        <ul class="component-features">
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Logical inference and deduction
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Probabilistic reasoning
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Causal analysis and planning
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Constraint satisfaction
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="component-card memory-card">
+                        <div class="component-header">
+                            <div class="component-icon memory-icon">
+                                <i class="fas fa-memory"></i>
+                            </div>
+                            <div class="component-title">Memory System</div>
+                        </div>
+                        <div class="component-desc">
+                            Manages short-term and long-term memory, context, and knowledge persistence.
+                        </div>
+                        <ul class="component-features">
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Working memory management
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Long-term knowledge storage
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Episodic memory tracking
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Context retrieval and indexing
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="component-card action-card">
+                        <div class="component-header">
+                            <div class="component-icon action-icon">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="component-title">Action Executor</div>
+                        </div>
+                        <div class="component-desc">
+                            Executes planned actions, manages tool interactions, and handles external system integration.
+                        </div>
+                        <ul class="component-features">
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Tool selection and execution
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                API integration and calls
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Error handling and recovery
+                            </li>
+                            <li class="feature-item">
+                                <div class="feature-bullet"></div>
+                                Result validation and feedback
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="implementation-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Implementation Architecture</h3>
+            
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                <strong>Key Design Principles:</strong><br>
+                <span style="color: #3b82f6;">Modularity</span> • <span style="color: #10b981;">Scalability</span> • <span style="color: #f59e0b;">Maintainability</span> • <span style="color: #ef4444;">Testability</span>
+            </div>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <i class="fas fa-code"></i>
+                    Core Architecture Implementation
+                </div>
+                <div class="code-content">
+<pre><code class="language-python">from abc import ABC, abstractmethod
+from typing import Dict, List, Any, Optional
+import asyncio
+from dataclasses import dataclass
+
+@dataclass
+class AgentState:
+    """Represents the current state of the agent"""
+    current_goal: Optional[str] = None
+    context: Dict[str, Any] = None
+    memory: Dict[str, Any] = None
+    active_tools: List[str] = None
+    
+class PerceptionModule(ABC):
+    """Abstract base class for perception components"""
+    
+    @abstractmethod
+    async def process_input(self, raw_input: Any) -> Dict[str, Any]:
+        """Process raw input and extract structured information"""
+        pass
+    
+    @abstractmethod
+    def extract_intent(self, processed_input: Dict[str, Any]) -> str:
+        """Extract user intent from processed input"""
+        pass
+
+class ReasoningEngine(ABC):
+    """Abstract base class for reasoning components"""
+    
+    @abstractmethod
+    async def analyze(self, state: AgentState, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze current state and input to determine next actions"""
+        pass
+    
+    @abstractmethod
+    async def plan(self, goal: str, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Create a plan to achieve the specified goal"""
+        pass
+
+class MemorySystem(ABC):
+    """Abstract base class for memory management"""
+    
+    @abstractmethod
+    async def store(self, key: str, value: Any, metadata: Dict[str, Any] = None):
+        """Store information in memory"""
+        pass
+    
+    @abstractmethod
+    async def retrieve(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Retrieve relevant information from memory"""
+        pass
+    
+    @abstractmethod
+    async def update_context(self, context_updates: Dict[str, Any]):
+        """Update the current context"""
+        pass
+
+class ActionExecutor(ABC):
+    """Abstract base class for action execution"""
+    
+    @abstractmethod
+    async def execute_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a specific action"""
+        pass
+    
+    @abstractmethod
+    async def validate_result(self, action: Dict[str, Any], result: Dict[str, Any]) -> bool:
+        """Validate the result of an action"""
+        pass
+
+class CoreAgent:
+    """Main agent orchestrator implementing the core architecture"""
+    
+    def __init__(self, 
+                 perception: PerceptionModule,
+                 reasoning: ReasoningEngine,
+                 memory: MemorySystem,
+                 executor: ActionExecutor):
+        self.perception = perception
+        self.reasoning = reasoning
+        self.memory = memory
+        self.executor = executor
+        self.state = AgentState()
+        self.running = False
+    
+    async def initialize(self):
+        """Initialize the agent and all components"""
+        await self.memory.store("agent_status", "initialized")
+        self.state.context = await self.memory.retrieve("initial_context")
+        self.running = True
+    
+    async def process_input(self, user_input: Any) -> Dict[str, Any]:
+        """Main processing loop for handling user input"""
+        try:
+            # Perception Phase
+            processed_input = await self.perception.process_input(user_input)
+            intent = self.perception.extract_intent(processed_input)
+            
+            # Update state with new input
+            self.state.current_goal = intent
+            await self.memory.update_context({
+                "last_input": processed_input,
+                "current_intent": intent,
+                "timestamp": self._get_timestamp()
+            })
+            
+            # Reasoning Phase
+            analysis = await self.reasoning.analyze(self.state, processed_input)
+            plan = await self.reasoning.plan(intent, self.state.context)
+            
+            # Execution Phase
+            results = []
+            for action in plan:
+                result = await self.executor.execute_action(action)
+                
+                # Validate and store result
+                if await self.executor.validate_result(action, result):
+                    results.append(result)
+                    await self.memory.store(f"action_result_{action['id']}", result)
+                else:
+                    # Handle execution failure
+                    error_result = await self._handle_execution_error(action, result)
+                    results.append(error_result)
+            
+            # Compile final response
+            response = await self._compile_response(results, intent)
+            
+            # Update memory with interaction
+            await self.memory.store("last_interaction", {
+                "input": processed_input,
+                "intent": intent,
+                "plan": plan,
+                "results": results,
+                "response": response
+            })
+            
+            return response
+            
+        except Exception as e:
+            return await self._handle_error(e, user_input)
+    
+    async def _handle_execution_error(self, action: Dict[str, Any], result: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle errors during action execution"""
+        error_context = {
+            "action": action,
+            "error": result.get("error"),
+            "timestamp": self._get_timestamp()
+        }
+        
+        # Store error for learning
+        await self.memory.store(f"error_{action['id']}", error_context)
+        
+        # Attempt recovery or alternative approach
+        recovery_plan = await self.reasoning.plan(
+            f"recover_from_error_{action['type']}", 
+            error_context
+        )
+        
+        if recovery_plan:
+            # Try recovery action
+            for recovery_action in recovery_plan:
+                recovery_result = await self.executor.execute_action(recovery_action)
+                if await self.executor.validate_result(recovery_action, recovery_result):
+                    return recovery_result
+        
+        # Return graceful error response
+        return {
+            "success": False,
+            "error": f"Failed to execute {action['type']} action",
+            "recovery_attempted": bool(recovery_plan)
+        }
+    
+    async def _compile_response(self, results: List[Dict[str, Any]], intent: str) -> Dict[str, Any]:
+        """Compile execution results into a coherent response"""
+        successful_results = [r for r in results if r.get("success", False)]
+        failed_results = [r for r in results if not r.get("success", False)]
+        
+        response = {
+            "intent": intent,
+            "success": len(successful_results) > 0,
+            "results": successful_results,
+            "errors": failed_results,
+            "summary": await self._generate_summary(successful_results, intent)
+        }
+        
+        return response
+    
+    async def _generate_summary(self, results: List[Dict[str, Any]], intent: str) -> str:
+        """Generate a human-readable summary of the results"""
+        if not results:
+            return f"Unable to complete the requested task: {intent}"
+        
+        # Use reasoning engine to generate appropriate summary
+        summary_context = {
+            "intent": intent,
+            "results": results,
+            "result_count": len(results)
+        }
+        
+        summary_plan = await self.reasoning.plan("generate_summary", summary_context)
+        if summary_plan:
+            summary_result = await self.executor.execute_action(summary_plan[0])
+            return summary_result.get("content", "Task completed successfully")
+        
+        return f"Successfully completed {len(results)} actions for: {intent}"
+    
+    async def _handle_error(self, error: Exception, user_input: Any) -> Dict[str, Any]:
+        """Handle unexpected errors in the main processing loop"""
+        error_context = {
+            "error_type": type(error).__name__,
+            "error_message": str(error),
+            "user_input": str(user_input),
+            "timestamp": self._get_timestamp()
+        }
+        
+        # Log error for debugging
+        await self.memory.store("system_error", error_context)
+        
+        return {
+            "success": False,
+            "error": "An unexpected error occurred while processing your request",
+            "error_id": error_context["timestamp"],
+            "recovery_suggestions": [
+                "Please try rephrasing your request",
+                "Check if all required information is provided",
+                "Contact support if the issue persists"
+            ]
+        }
+    
+    def _get_timestamp(self) -> str:
+        """Get current timestamp for logging"""
+        import datetime
+        return datetime.datetime.now().isoformat()
+    
+    async def shutdown(self):
+        """Gracefully shutdown the agent"""
+        self.running = False
+        await self.memory.store("agent_status", "shutdown")
+
+# Example concrete implementations
+class LLMPerceptionModule(PerceptionModule):
+    """LLM-based perception implementation"""
+    
+    def __init__(self, llm_client):
+        self.llm = llm_client
+    
+    async def process_input(self, raw_input: Any) -> Dict[str, Any]:
+        # Implementation for LLM-based input processing
+        response = await self.llm.process(raw_input)
+        return {
+            "text": raw_input,
+            "entities": response.get("entities", []),
+            "sentiment": response.get("sentiment"),
+            "language": response.get("language", "en")
+        }
+    
+    def extract_intent(self, processed_input: Dict[str, Any]) -> str:
+        # Extract intent from processed input
+        return processed_input.get("intent", "general_query")
+
+class VectorMemorySystem(MemorySystem):
+    """Vector database-based memory implementation"""
+    
+    def __init__(self, vector_db):
+        self.vector_db = vector_db
+        self.context = {}
+    
+    async def store(self, key: str, value: Any, metadata: Dict[str, Any] = None):
+        # Implementation for vector storage
+        await self.vector_db.insert(key, value, metadata or {})
+    
+    async def retrieve(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
+        # Implementation for vector retrieval
+        return await self.vector_db.similarity_search(query, limit)
+    
+    async def update_context(self, context_updates: Dict[str, Any]):
+        self.context.update(context_updates)
+
+# Usage example
+async def create_agent():
+    # Initialize components
+    perception = LLMPerceptionModule(llm_client)
+    reasoning = AdvancedReasoningEngine()
+    memory = VectorMemorySystem(vector_db)
+    executor = ToolBasedExecutor(tool_registry)
+    
+    # Create and initialize agent
+    agent = CoreAgent(perception, reasoning, memory, executor)
+    await agent.initialize()
+    
+    return agent
+</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="patterns-section">
+            <h3 class="text-xl font-bold mb-2">Architectural Patterns</h3>
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-title">
+                        <i class="fas fa-layer-group pattern-icon"></i>
+                        Layered Architecture
+                    </div>
+                    <div class="pattern-desc">
+                        Separates concerns into distinct layers with clear interfaces and dependencies.
+                    </div>
+                    <div class="pattern-benefits">
+                        Benefits: Modularity, testability, maintainability, clear separation of concerns
+                    </div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-title">
+                        <i class="fas fa-project-diagram pattern-icon"></i>
+                        Event-Driven Architecture
+                    </div>
+                    <div class="pattern-desc">
+                        Components communicate through events, enabling loose coupling and scalability.
+                    </div>
+                    <div class="pattern-benefits">
+                        Benefits: Scalability, flexibility, real-time processing, system resilience
+                    </div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-title">
+                        <i class="fas fa-puzzle-piece pattern-icon"></i>
+                        Plugin Architecture
+                    </div>
+                    <div class="pattern-desc">
+                        Extensible system where components can be added or removed dynamically.
+                    </div>
+                    <div class="pattern-benefits">
+                        Benefits: Extensibility, customization, third-party integration, modularity
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #ef4444;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .deployment-overview {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .overview-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .overview-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .overview-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-sections {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .deployment-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .section-icon {
+            margin-right: 12px;
+            color: #ef4444;
+            font-size: 20px;
+        }
+        .deployment-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+        .deployment-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid #ef4444;
+            transition: transform 0.2s ease;
+        }
+        .deployment-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .card-icon {
+            width: 32px;
+            height: 32px;
+            background: #ef4444;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+        .card-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .card-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .card-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .feature-tag {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        .infrastructure-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .infra-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .infra-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .infra-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fca5a5;
+            display: flex;
+            align-items: center;
+        }
+        .infra-icon {
+            margin-right: 8px;
+        }
+        .infra-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .infra-example {
+            font-size: 11px;
+            color: #10b981;
+            font-weight: 500;
+        }
+        .implementation-example {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .code-content {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .code-header i {
+            color: #ef4444;
+        }
+        .code-body {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .monitoring-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .monitoring-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .monitor-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid #ef4444;
+        }
+        .monitor-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        .monitor-icon {
+            margin-right: 8px;
+            color: #ef4444;
+        }
+        .monitor-desc {
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .monitor-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .monitor-tag {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Deployment and Production Considerations</h1>
+            <p class="text-lg text-gray-600">Infrastructure, Scaling, Security, and Maintenance for AI Agent Systems</p>
+        </div>
+        
+        <div class="deployment-overview">
+            <div class="overview-icon">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <div class="overview-content">
+                <h3>Production-Ready AI Agent Deployment</h3>
+                <p>
+                    Comprehensive strategies for deploying AI agents to production environments with 
+                    enterprise-grade infrastructure, security, monitoring, and maintenance considerations.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-sections">
+            <div class="deployment-section">
+                <div class="section-title">
+                    <i class="fas fa-server section-icon"></i>
+                    Infrastructure Requirements
+                </div>
+                <div class="deployment-grid">
+                    <div class="deployment-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <div class="card-title">Cloud Infrastructure</div>
+                        </div>
+                        <div class="card-desc">
+                            Scalable cloud deployment with auto-scaling, load balancing, and multi-region support 
+                            for high availability and performance.
+                        </div>
+                        <div class="card-features">
+                            <span class="feature-tag">Auto-scaling</span>
+                            <span class="feature-tag">Load Balancing</span>
+                            <span class="feature-tag">Multi-region</span>
+                        </div>
+                    </div>
+                    
+                    <div class="deployment-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="card-title">Data Storage</div>
+                        </div>
+                        <div class="card-desc">
+                            Persistent storage for conversation history, agent state, and knowledge bases 
+                            with backup and disaster recovery capabilities.
+                        </div>
+                        <div class="card-features">
+                            <span class="feature-tag">Vector Databases</span>
+                            <span class="feature-tag">State Persistence</span>
+                            <span class="feature-tag">Backup & Recovery</span>
+                        </div>
+                    </div>
+                    
+                    <div class="deployment-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-network-wired"></i>
+                            </div>
+                            <div class="card-title">API Gateway</div>
+                        </div>
+                        <div class="card-desc">
+                            Centralized API management with rate limiting, authentication, request routing, 
+                            and traffic management for agent endpoints.
+                        </div>
+                        <div class="card-features">
+                            <span class="feature-tag">Rate Limiting</span>
+                            <span class="feature-tag">Authentication</span>
+                            <span class="feature-tag">Traffic Management</span>
+                        </div>
+                    </div>
+                    
+                    <div class="deployment-card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="card-title">Container Orchestration</div>
+                        </div>
+                        <div class="card-desc">
+                            Kubernetes or Docker Swarm for container management, service discovery, 
+                            and automated deployment with rolling updates.
+                        </div>
+                        <div class="card-features">
+                            <span class="feature-tag">Kubernetes</span>
+                            <span class="feature-tag">Service Discovery</span>
+                            <span class="feature-tag">Rolling Updates</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="infrastructure-section">
+                <div class="section-title" style="color: white;">
+                    <i class="fas fa-shield-alt section-icon" style="color: #fca5a5;"></i>
+                    Security & Compliance
+                </div>
+                
+                <div class="infra-grid">
+                    <div class="infra-card">
+                        <div class="infra-title">
+                            <i class="fas fa-lock infra-icon"></i>
+                            Data Encryption
+                        </div>
+                        <div class="infra-desc">
+                            End-to-end encryption for data in transit and at rest, with secure key management 
+                            and compliance with industry standards.
+                        </div>
+                        <div class="infra-example">
+                            Example: TLS 1.3, AES-256 encryption, AWS KMS, Azure Key Vault
+                        </div>
+                    </div>
+                    
+                    <div class="infra-card">
+                        <div class="infra-title">
+                            <i class="fas fa-user-shield infra-icon"></i>
+                            Access Control
+                        </div>
+                        <div class="infra-desc">
+                            Role-based access control (RBAC), multi-factor authentication, and audit logging 
+                            for secure agent access and administration.
+                        </div>
+                        <div class="infra-example">
+                            Example: OAuth 2.0, SAML, JWT tokens, audit trails
+                        </div>
+                    </div>
+                    
+                    <div class="infra-card">
+                        <div class="infra-title">
+                            <i class="fas fa-clipboard-check infra-icon"></i>
+                            Compliance
+                        </div>
+                        <div class="infra-desc">
+                            GDPR, HIPAA, SOC 2 compliance with data privacy controls, consent management, 
+                            and regulatory reporting capabilities.
+                        </div>
+                        <div class="infra-example">
+                            Example: Data anonymization, consent tracking, audit reports
+                        </div>
+                    </div>
+                    
+                    <div class="infra-card">
+                        <div class="infra-title">
+                            <i class="fas fa-bug infra-icon"></i>
+                            Vulnerability Management
+                        </div>
+                        <div class="infra-desc">
+                            Regular security scanning, penetration testing, and vulnerability assessment 
+                            with automated patching and incident response.
+                        </div>
+                        <div class="infra-example">
+                            Example: OWASP scanning, dependency checks, security monitoring
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="implementation-example">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Production Deployment Architecture Implementation</h3>
+            
+            <div class="code-content">
+                <div class="code-header">
+                    <div>
+                        <i class="fas fa-code"></i>
+                        Production AI Agent Deployment Configuration
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.7;">Docker + Kubernetes + Monitoring + Security</div>
+                </div>
+                <div class="code-body">
+<pre><code class="language-yaml"># Production Deployment Configuration
+
+# Docker Configuration
+# Dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create non-root user for security
+RUN useradd -m -u 1000 agent && chown -R agent:agent /app
+USER agent
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+EXPOSE 8000
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+---
+# Kubernetes Deployment Configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-agent-deployment
+  namespace: production
+  labels:
+    app: ai-agent
+    version: v1.0.0
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: ai-agent
+  template:
+    metadata:
+      labels:
+        app: ai-agent
+        version: v1.0.0
+    spec:
+      serviceAccountName: ai-agent-service-account
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: ai-agent
+        image: your-registry/ai-agent:v1.0.0
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: ai-agent-secrets
+              key: database-url
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ai-agent-secrets
+              key: openai-api-key
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: ai-agent-config
+              key: redis-url
+        - name: LOG_LEVEL
+          value: "INFO"
+        - name: ENVIRONMENT
+          value: "production"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: agent-config
+          mountPath: /app/config
+          readOnly: true
+        - name: logs
+          mountPath: /app/logs
+      volumes:
+      - name: agent-config
+        configMap:
+          name: ai-agent-config
+      - name: logs
+        emptyDir: {}
+
+---
+# Service Configuration
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-agent-service
+  namespace: production
+  labels:
+    app: ai-agent
+spec:
+  selector:
+    app: ai-agent
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8000
+    protocol: TCP
+  type: ClusterIP
+
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ai-agent-hpa
+  namespace: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ai-agent-deployment
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 10
+        periodSeconds: 60
+
+---
+# Ingress Configuration
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ai-agent-ingress
+  namespace: production
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - api.yourdomain.com
+    secretName: ai-agent-tls
+  rules:
+  - host: api.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ai-agent-service
+            port:
+              number: 80
+
+---
+# ConfigMap for Application Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ai-agent-config
+  namespace: production
+data:
+  redis-url: "redis://redis-service:6379"
+  max-conversation-length: "100"
+  default-timeout: "30"
+  rate-limit-per-minute: "60"
+  log-format: "json"
+  metrics-enabled: "true"
+
+---
+# Secret for Sensitive Configuration
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ai-agent-secrets
+  namespace: production
+type: Opaque
+data:
+  database-url: <base64-encoded-database-url>
+  openai-api-key: <base64-encoded-openai-key>
+  jwt-secret: <base64-encoded-jwt-secret>
+
+---
+# ServiceAccount and RBAC
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ai-agent-service-account
+  namespace: production
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ai-agent-role
+  namespace: production
+rules:
+- apiGroups: [""]
+  resources: ["configmaps", "secrets"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ai-agent-role-binding
+  namespace: production
+subjects:
+- kind: ServiceAccount
+  name: ai-agent-service-account
+  namespace: production
+roleRef:
+  kind: Role
+  name: ai-agent-role
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# Network Policy for Security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ai-agent-network-policy
+  namespace: production
+spec:
+  podSelector:
+    matchLabels:
+      app: ai-agent
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 8000
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: database
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443  # HTTPS for external APIs
+
+---
+# Monitoring Configuration (Prometheus)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ai-agent-metrics
+  namespace: production
+  labels:
+    app: ai-agent
+spec:
+  selector:
+    matchLabels:
+      app: ai-agent
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+
+---
+# Application Configuration (Python)
+# config/production.py
+import os
+from typing import Dict, Any
+
+class ProductionConfig:
+    """Production configuration for AI Agent"""
+    
+    # Database Configuration
+    DATABASE_URL = os.getenv("DATABASE_URL")
+    REDIS_URL = os.getenv("REDIS_URL")
+    
+    # API Configuration
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    MAX_TOKENS = 4000
+    TEMPERATURE = 0.7
+    
+    # Security Configuration
+    JWT_SECRET = os.getenv("JWT_SECRET")
+    JWT_EXPIRATION = 3600  # 1 hour
+    RATE_LIMIT_PER_MINUTE = 60
+    
+    # Logging Configuration
+    LOG_LEVEL = "INFO"
+    LOG_FORMAT = "json"
+    
+    # Performance Configuration
+    MAX_CONVERSATION_LENGTH = 100
+    DEFAULT_TIMEOUT = 30
+    CONNECTION_POOL_SIZE = 20
+    
+    # Monitoring Configuration
+    METRICS_ENABLED = True
+    HEALTH_CHECK_INTERVAL = 30
+    
+    # Feature Flags
+    ENABLE_CACHING = True
+    ENABLE_RATE_LIMITING = True
+    ENABLE_AUDIT_LOGGING = True
+    
+    @classmethod
+    def get_config(cls) -> Dict[str, Any]:
+        """Get configuration as dictionary"""
+        return {
+            key: getattr(cls, key)
+            for key in dir(cls)
+            if not key.startswith('_') and not callable(getattr(cls, key))
+        }
+
+# Deployment Script
+# deploy.py
+import subprocess
+import sys
+import time
+from typing import List
+
+class ProductionDeployer:
+    """Production deployment automation"""
+    
+    def __init__(self, namespace: str = "production"):
+        self.namespace = namespace
+    
+    def run_command(self, command: List[str]) -> bool:
+        """Run shell command and return success status"""
+        try:
+            result = subprocess.run(
+                command, 
+                check=True, 
+                capture_output=True, 
+                text=True
+            )
+            print(f"✓ {' '.join(command)}")
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"✗ {' '.join(command)}")
+            print(f"Error: {e.stderr}")
+            return False
+    
+    def deploy(self) -> bool:
+        """Deploy AI agent to production"""
+        
+        print("🚀 Starting production deployment...")
+        
+        # Build and push Docker image
+        if not self.build_and_push_image():
+            return False
+        
+        # Apply Kubernetes configurations
+        if not self.apply_kubernetes_configs():
+            return False
+        
+        # Wait for deployment to be ready
+        if not self.wait_for_deployment():
+            return False
+        
+        # Run health checks
+        if not self.run_health_checks():
+            return False
+        
+        print("✅ Production deployment completed successfully!")
+        return True
+    
+    def build_and_push_image(self) -> bool:
+        """Build and push Docker image"""
+        print("📦 Building Docker image...")
+        
+        commands = [
+            ["docker", "build", "-t", "ai-agent:latest", "."],
+            ["docker", "tag", "ai-agent:latest", "your-registry/ai-agent:v1.0.0"],
+            ["docker", "push", "your-registry/ai-agent:v1.0.0"]
+        ]
+        
+        for command in commands:
+            if not self.run_command(command):
+                return False
+        
+        return True
+    
+    def apply_kubernetes_configs(self) -> bool:
+        """Apply Kubernetes configurations"""
+        print("⚙️ Applying Kubernetes configurations...")
+        
+        config_files = [
+            "k8s/namespace.yaml",
+            "k8s/secrets.yaml",
+            "k8s/configmap.yaml",
+            "k8s/deployment.yaml",
+            "k8s/service.yaml",
+            "k8s/ingress.yaml",
+            "k8s/hpa.yaml",
+            "k8s/network-policy.yaml"
+        ]
+        
+        for config_file in config_files:
+            if not self.run_command(["kubectl", "apply", "-f", config_file]):
+                return False
+        
+        return True
+    
+    def wait_for_deployment(self) -> bool:
+        """Wait for deployment to be ready"""
+        print("⏳ Waiting for deployment to be ready...")
+        
+        command = [
+            "kubectl", "rollout", "status", 
+            f"deployment/ai-agent-deployment",
+            "-n", self.namespace,
+            "--timeout=300s"
+        ]
+        
+        return self.run_command(command)
+    
+    def run_health_checks(self) -> bool:
+        """Run post-deployment health checks"""
+        print("🏥 Running health checks...")
+        
+        # Get service endpoint
+        try:
+            result = subprocess.run([
+                "kubectl", "get", "service", "ai-agent-service",
+                "-n", self.namespace,
+                "-o", "jsonpath={.status.loadBalancer.ingress[0].ip}"
+            ], capture_output=True, text=True, check=True)
+            
+            service_ip = result.stdout.strip()
+            if not service_ip:
+                print("⚠️ Service IP not available yet")
+                return False
+            
+            # Test health endpoint
+            health_command = [
+                "curl", "-f", f"http://{service_ip}/health"
+            ]
+            
+            return self.run_command(health_command)
+            
+        except subprocess.CalledProcessError:
+            print("⚠️ Could not retrieve service information")
+            return False
+
+if __name__ == "__main__":
+    deployer = ProductionDeployer()
+    success = deployer.deploy()
+    sys.exit(0 if success else 1)
+</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="monitoring-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Monitoring and Maintenance</h3>
+            <div class="monitoring-grid">
+                <div class="monitor-card">
+                    <div class="monitor-title">
+                        <i class="fas fa-chart-line monitor-icon"></i>
+                        Performance Monitoring
+                    </div>
+                    <div class="monitor-desc">
+                        Real-time monitoring of response times, throughput, error rates, and resource utilization 
+                        with alerting and automated scaling.
+                    </div>
+                    <div class="monitor-features">
+                        <span class="monitor-tag">Prometheus</span>
+                        <span class="monitor-tag">Grafana</span>
+                        <span class="monitor-tag">Alerting</span>
+                    </div>
+                </div>
+                <div class="monitor-card">
+                    <div class="monitor-title">
+                        <i class="fas fa-comments monitor-icon"></i>
+                        Conversation Analytics
+                    </div>
+                    <div class="monitor-desc">
+                        Track conversation quality, user satisfaction, completion rates, and agent effectiveness 
+                        with detailed analytics and reporting.
+                    </div>
+                    <div class="monitor-features">
+                        <span class="monitor-tag">Quality Metrics</span>
+                        <span class="monitor-tag">User Feedback</span>
+                        <span class="monitor-tag">Analytics</span>
+                    </div>
+                </div>
+                <div class="monitor-card">
+                    <div class="monitor-title">
+                        <i class="fas fa-exclamation-triangle monitor-icon"></i>
+                        Error Tracking
+                    </div>
+                    <div class="monitor-desc">
+                        Comprehensive error tracking and logging with automated incident detection, 
+                        root cause analysis, and resolution workflows.
+                    </div>
+                    <div class="monitor-features">
+                        <span class="monitor-tag">Error Tracking</span>
+                        <span class="monitor-tag">Incident Management</span>
+                        <span class="monitor-tag">Root Cause Analysis</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

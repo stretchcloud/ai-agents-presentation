@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .comparison-overview {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .comparison-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .comparison-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .comparison-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .comparison-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .comparison-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .agent-card { border-top-color: #3b82f6; }
+        .assistant-card { border-top-color: #06b6d4; }
+        .chatbot-card { border-top-color: #8b5cf6; }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+            font-size: 20px;
+        }
+        .agent-icon { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .assistant-icon { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .chatbot-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .card-subtitle {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .card-description {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .capabilities-section {
+            margin-bottom: 16px;
+        }
+        .capabilities-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .capabilities-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .capability-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .capability-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .agent-bullet { background: #3b82f6; }
+        .assistant-bullet { background: #06b6d4; }
+        .chatbot-bullet { background: #8b5cf6; }
+        
+        .technical-specs {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .spec-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .spec-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 11px;
+        }
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            color: #64748b;
+        }
+        .spec-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .use-cases {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .use-cases-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .use-case-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .use-case-tag {
+            background: white;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 10px;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        .complexity-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 4px 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .agent-complexity { color: #dc2626; }
+        .assistant-complexity { color: #d97706; }
+        .chatbot-complexity { color: #16a34a; }
+        
+        .detailed-comparison {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        .comparison-table th {
+            background: #f8fafc;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 12px;
+        }
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 11px;
+            color: #475569;
+            vertical-align: top;
+        }
+        .comparison-table tr:hover {
+            background: #f8fafc;
+        }
+        .feature-rating {
+            display: flex;
+            gap: 2px;
+        }
+        .rating-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e2e8f0;
+        }
+        .rating-dot.active { background: #10b981; }
+        .rating-dot.partial { background: #f59e0b; }
+        
+        .implementation-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .implementation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .implementation-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .implementation-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #06b6d4;
+            display: flex;
+            align-items: center;
+        }
+        .implementation-icon {
+            margin-right: 8px;
+        }
+        .implementation-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .implementation-code {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            padding: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 10px;
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Agent vs Assistant vs Chatbot</h1>
+            <p class="text-lg text-gray-600">Technical Distinctions and Implementation Considerations</p>
+        </div>
+        
+        <div class="comparison-overview">
+            <div class="comparison-icon">
+                <i class="fas fa-balance-scale"></i>
+            </div>
+            <div class="comparison-content">
+                <h3>Understanding the Spectrum</h3>
+                <p>
+                    Each approach represents different levels of autonomy, complexity, and capability. 
+                    Understanding these distinctions is crucial for choosing the right solution.
+                </p>
+            </div>
+        </div>
+        
+        <div class="comparison-grid">
+            <div class="comparison-card agent-card">
+                <div class="complexity-indicator agent-complexity">High Complexity</div>
+                <div class="card-header">
+                    <div class="card-icon agent-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">AI Agent</div>
+                        <div class="card-subtitle">Autonomous Decision Maker</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Autonomous systems that can perceive, reason, plan, and act independently to achieve goals. 
+                    They maintain state, learn from interactions, and adapt their behavior over time.
+                </div>
+                
+                <div class="technical-specs">
+                    <div class="spec-title">Technical Specifications</div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span>Autonomy Level:</span>
+                            <span class="spec-value">High</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>State Management:</span>
+                            <span class="spec-value">Persistent</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>Learning Capability:</span>
+                            <span class="spec-value">Adaptive</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>Tool Integration:</span>
+                            <span class="spec-value">Extensive</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="capabilities-section">
+                    <div class="capabilities-title">Core Capabilities</div>
+                    <ul class="capabilities-list">
+                        <li class="capability-item">
+                            <div class="capability-bullet agent-bullet"></div>
+                            Goal-oriented planning and execution
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet agent-bullet"></div>
+                            Multi-step reasoning and decision making
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet agent-bullet"></div>
+                            Dynamic tool selection and usage
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet agent-bullet"></div>
+                            Memory and context management
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet agent-bullet"></div>
+                            Learning from feedback and experience
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet agent-bullet"></div>
+                            Error recovery and adaptation
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="use-cases">
+                    <div class="use-cases-title">Primary Use Cases</div>
+                    <div class="use-case-tags">
+                        <span class="use-case-tag">Complex Workflows</span>
+                        <span class="use-case-tag">Research Tasks</span>
+                        <span class="use-case-tag">Code Generation</span>
+                        <span class="use-case-tag">Data Analysis</span>
+                        <span class="use-case-tag">Process Automation</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-card assistant-card">
+                <div class="complexity-indicator assistant-complexity">Medium Complexity</div>
+                <div class="card-header">
+                    <div class="card-icon assistant-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">AI Assistant</div>
+                        <div class="card-subtitle">Interactive Helper</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Interactive systems that provide assistance and support to users through conversation. 
+                    They can access tools and information but require human guidance for complex tasks.
+                </div>
+                
+                <div class="technical-specs">
+                    <div class="spec-title">Technical Specifications</div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span>Autonomy Level:</span>
+                            <span class="spec-value">Medium</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>State Management:</span>
+                            <span class="spec-value">Session-based</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>Learning Capability:</span>
+                            <span class="spec-value">Limited</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>Tool Integration:</span>
+                            <span class="spec-value">Moderate</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="capabilities-section">
+                    <div class="capabilities-title">Core Capabilities</div>
+                    <ul class="capabilities-list">
+                        <li class="capability-item">
+                            <div class="capability-bullet assistant-bullet"></div>
+                            Natural language understanding and generation
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet assistant-bullet"></div>
+                            Information retrieval and synthesis
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet assistant-bullet"></div>
+                            Basic tool and API integration
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet assistant-bullet"></div>
+                            Context awareness within sessions
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet assistant-bullet"></div>
+                            Task guidance and recommendations
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet assistant-bullet"></div>
+                            Multi-modal interaction support
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="use-cases">
+                    <div class="use-cases-title">Primary Use Cases</div>
+                    <div class="use-case-tags">
+                        <span class="use-case-tag">Q&A Systems</span>
+                        <span class="use-case-tag">Content Creation</span>
+                        <span class="use-case-tag">Research Support</span>
+                        <span class="use-case-tag">Productivity Tools</span>
+                        <span class="use-case-tag">Learning Aids</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-card chatbot-card">
+                <div class="complexity-indicator chatbot-complexity">Low Complexity</div>
+                <div class="card-header">
+                    <div class="card-icon chatbot-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Chatbot</div>
+                        <div class="card-subtitle">Conversational Interface</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Rule-based or simple AI systems designed for specific conversational tasks. 
+                    They follow predefined flows and provide responses based on pattern matching or simple ML models.
+                </div>
+                
+                <div class="technical-specs">
+                    <div class="spec-title">Technical Specifications</div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span>Autonomy Level:</span>
+                            <span class="spec-value">Low</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>State Management:</span>
+                            <span class="spec-value">Minimal</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>Learning Capability:</span>
+                            <span class="spec-value">Static</span>
+                        </div>
+                        <div class="spec-item">
+                            <span>Tool Integration:</span>
+                            <span class="spec-value">Basic</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="capabilities-section">
+                    <div class="capabilities-title">Core Capabilities</div>
+                    <ul class="capabilities-list">
+                        <li class="capability-item">
+                            <div class="capability-bullet chatbot-bullet"></div>
+                            Pattern-based response generation
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet chatbot-bullet"></div>
+                            Intent recognition and classification
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet chatbot-bullet"></div>
+                            Simple workflow automation
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet chatbot-bullet"></div>
+                            Basic entity extraction
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet chatbot-bullet"></div>
+                            Predefined conversation flows
+                        </li>
+                        <li class="capability-item">
+                            <div class="capability-bullet chatbot-bullet"></div>
+                            Integration with business systems
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="use-cases">
+                    <div class="use-cases-title">Primary Use Cases</div>
+                    <div class="use-case-tags">
+                        <span class="use-case-tag">Customer Support</span>
+                        <span class="use-case-tag">FAQ Systems</span>
+                        <span class="use-case-tag">Lead Qualification</span>
+                        <span class="use-case-tag">Appointment Booking</span>
+                        <span class="use-case-tag">Order Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="detailed-comparison">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Detailed Feature Comparison</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>AI Agent</th>
+                        <th>AI Assistant</th>
+                        <th>Chatbot</th>
+                        <th>Implementation Complexity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Autonomy</strong></td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                            </div>
+                            Can operate independently for extended periods
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Requires human guidance for complex decisions
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Follows predefined rules and flows
+                        </td>
+                        <td>High - Requires sophisticated planning and reasoning systems</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Memory & Context</strong></td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                            </div>
+                            Long-term memory, context across sessions
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Session-based context, limited persistence
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Minimal context, conversation-scoped
+                        </td>
+                        <td>Medium - Vector databases and memory management</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tool Integration</strong></td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                            </div>
+                            Dynamic tool selection and chaining
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Predefined tool access with user approval
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Basic API calls for specific functions
+                        </td>
+                        <td>High - Requires tool calling frameworks and security</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning & Adaptation</strong></td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Continuous learning from interactions
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Limited learning within model constraints
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Static responses, manual updates required
+                        </td>
+                        <td>Very High - ML pipelines and feedback systems</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Error Handling</strong></td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Self-recovery and alternative strategies
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot partial"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Graceful degradation with user notification
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Basic error messages and fallback responses
+                        </td>
+                        <td>Medium - Exception handling and retry logic</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Development Cost</strong></td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                            </div>
+                            High initial investment, complex architecture
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Moderate cost, leverages existing platforms
+                        </td>
+                        <td>
+                            <div class="feature-rating">
+                                <div class="rating-dot active"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                                <div class="rating-dot"></div>
+                            </div>
+                            Low cost, template-based development
+                        </td>
+                        <td>Varies - From simple rule engines to complex AI systems</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="implementation-section">
+            <h3 class="text-xl font-bold mb-2">Implementation Approaches</h3>
+            <div class="implementation-grid">
+                <div class="implementation-card">
+                    <div class="implementation-title">
+                        <i class="fas fa-robot implementation-icon"></i>
+                        AI Agent Implementation
+                    </div>
+                    <div class="implementation-desc">
+                        Full autonomous system with planning, reasoning, and tool integration capabilities.
+                    </div>
+                    <div class="implementation-code">
+<pre>class AutonomousAgent:
+    def __init__(self):
+        self.planner = PlanningEngine()
+        self.memory = LongTermMemory()
+        self.tools = ToolRegistry()
+        self.reasoner = ReasoningEngine()
+    
+    async def execute_goal(self, goal):
+        plan = self.planner.create_plan(goal)
+        for step in plan.steps:
+            result = await self.execute_step(step)
+            self.memory.store(step, result)
+            if not result.success:
+                plan = self.planner.replan(goal, result)
+        return plan.result</pre>
+                    </div>
+                </div>
+                <div class="implementation-card">
+                    <div class="implementation-title">
+                        <i class="fas fa-user-tie implementation-icon"></i>
+                        AI Assistant Implementation
+                    </div>
+                    <div class="implementation-desc">
+                        Interactive system with guided tool access and session-based context management.
+                    </div>
+                    <div class="implementation-code">
+<pre>class AIAssistant:
+    def __init__(self):
+        self.llm = LanguageModel()
+        self.tools = ToolSet()
+        self.session = SessionManager()
+    
+    async def process_request(self, user_input):
+        context = self.session.get_context()
+        response = await self.llm.generate(
+            user_input, context, self.tools
+        )
+        if response.requires_tool:
+            tool_result = await self.execute_tool(
+                response.tool, response.params
+            )
+            response = self.format_response(tool_result)
+        self.session.update_context(response)
+        return response</pre>
+                    </div>
+                </div>
+                <div class="implementation-card">
+                    <div class="implementation-title">
+                        <i class="fas fa-comments implementation-icon"></i>
+                        Chatbot Implementation
+                    </div>
+                    <div class="implementation-desc">
+                        Rule-based or simple ML system for specific conversational tasks and workflows.
+                    </div>
+                    <div class="implementation-code">
+<pre>class Chatbot:
+    def __init__(self):
+        self.intent_classifier = IntentClassifier()
+        self.response_templates = ResponseTemplates()
+        self.workflow_engine = WorkflowEngine()
+    
+    def process_message(self, message):
+        intent = self.intent_classifier.classify(message)
+        entities = self.extract_entities(message)
+        
+        if intent.requires_workflow:
+            return self.workflow_engine.execute(
+                intent.workflow, entities
+            )
+        else:
+            return self.response_templates.get_response(
+                intent, entities
+            )</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

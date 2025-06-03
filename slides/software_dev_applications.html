@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .dev-overview {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .overview-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .overview-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .overview-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .application-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+            transition: transform 0.2s ease;
+        }
+        .application-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .code-gen-card { border-top-color: #10b981; }
+        .testing-card { border-top-color: #3b82f6; }
+        .devops-card { border-top-color: #f59e0b; }
+        .review-card { border-top-color: #8b5cf6; }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+            font-size: 18px;
+        }
+        .code-gen-icon { background: linear-gradient(135deg, #10b981, #059669); }
+        .testing-icon { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .devops-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .review-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .card-subtitle {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        .card-description {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: #475569;
+        }
+        .feature-bullet {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            margin-right: 8px;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
+        .code-gen-bullet { background: #10b981; }
+        .testing-bullet { background: #3b82f6; }
+        .devops-bullet { background: #f59e0b; }
+        .review-bullet { background: #8b5cf6; }
+        
+        .productivity-metrics {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .metric-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            border-top: 3px solid #3b82f6;
+        }
+        .metric-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 4px;
+        }
+        .metric-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        .metric-desc {
+            font-size: 10px;
+            color: #64748b;
+            line-height: 1.3;
+        }
+        .implementation-example {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .code-content {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .code-header i {
+            color: #3b82f6;
+        }
+        .code-body {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">AI Agents in Software Development</h1>
+            <p class="text-lg text-gray-600">Transforming Developer Workflows with Intelligent Automation</p>
+        </div>
+        
+        <div class="dev-overview">
+            <div class="overview-icon">
+                <i class="fas fa-code"></i>
+            </div>
+            <div class="overview-content">
+                <h3>Revolutionizing Software Development</h3>
+                <p>
+                    AI agents are transforming every aspect of software development, from code generation 
+                    and testing to deployment and maintenance, creating more efficient and intelligent workflows.
+                </p>
+            </div>
+        </div>
+        
+        <div class="applications-grid">
+            <div class="application-card code-gen-card">
+                <div class="card-header">
+                    <div class="card-icon code-gen-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Code Generation & Completion</div>
+                        <div class="card-subtitle">Intelligent Code Creation</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    AI agents that understand context, requirements, and coding patterns to generate 
+                    high-quality code, complete functions, and suggest optimizations.
+                </div>
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <div class="feature-bullet code-gen-bullet"></div>
+                        Context-aware code completion and generation
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet code-gen-bullet"></div>
+                        Multi-language support and framework integration
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet code-gen-bullet"></div>
+                        Requirement-to-code translation
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet code-gen-bullet"></div>
+                        Code refactoring and optimization suggestions
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet code-gen-bullet"></div>
+                        Documentation generation from code
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet code-gen-bullet"></div>
+                        API integration and boilerplate generation
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="application-card testing-card">
+                <div class="card-header">
+                    <div class="card-icon testing-icon">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Automated Testing & QA</div>
+                        <div class="card-subtitle">Intelligent Quality Assurance</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Comprehensive testing agents that generate test cases, identify edge cases, 
+                    perform regression testing, and ensure code quality across the development lifecycle.
+                </div>
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <div class="feature-bullet testing-bullet"></div>
+                        Automated test case generation and execution
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet testing-bullet"></div>
+                        Edge case identification and boundary testing
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet testing-bullet"></div>
+                        Regression testing and change impact analysis
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet testing-bullet"></div>
+                        Performance testing and load simulation
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet testing-bullet"></div>
+                        Security vulnerability scanning
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet testing-bullet"></div>
+                        Test data generation and management
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="application-card devops-card">
+                <div class="card-header">
+                    <div class="card-icon devops-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">DevOps & Deployment</div>
+                        <div class="card-subtitle">Intelligent Operations</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    DevOps agents that automate deployment pipelines, monitor system health, 
+                    manage infrastructure, and optimize resource utilization across environments.
+                </div>
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <div class="feature-bullet devops-bullet"></div>
+                        Automated CI/CD pipeline management
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet devops-bullet"></div>
+                        Infrastructure provisioning and scaling
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet devops-bullet"></div>
+                        System monitoring and alerting
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet devops-bullet"></div>
+                        Performance optimization and tuning
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet devops-bullet"></div>
+                        Incident response and root cause analysis
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet devops-bullet"></div>
+                        Cost optimization and resource management
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="application-card review-card">
+                <div class="card-header">
+                    <div class="card-icon review-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Code Review & Analysis</div>
+                        <div class="card-subtitle">Intelligent Code Assessment</div>
+                    </div>
+                </div>
+                <div class="card-description">
+                    Advanced code review agents that analyze code quality, security vulnerabilities, 
+                    performance issues, and provide actionable feedback for improvement.
+                </div>
+                <ul class="features-list">
+                    <li class="feature-item">
+                        <div class="feature-bullet review-bullet"></div>
+                        Automated code quality assessment
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet review-bullet"></div>
+                        Security vulnerability detection
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet review-bullet"></div>
+                        Performance bottleneck identification
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet review-bullet"></div>
+                        Best practices enforcement
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet review-bullet"></div>
+                        Technical debt analysis and recommendations
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet review-bullet"></div>
+                        Compliance and standards verification
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="productivity-metrics">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Developer Productivity Impact</h3>
+            <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 16px; font-size: 13px; color: #64748b;">
+                <strong>Industry Data:</strong> Organizations implementing AI agents in development workflows report significant improvements 
+                in productivity, code quality, and time-to-market metrics.
+            </div>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-number">40-60%</div>
+                    <div class="metric-label">Faster Development</div>
+                    <div class="metric-desc">Reduction in development time through automated code generation and completion</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">70%</div>
+                    <div class="metric-label">Bug Reduction</div>
+                    <div class="metric-desc">Decrease in production bugs through AI-powered testing and code review</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">50%</div>
+                    <div class="metric-label">Testing Efficiency</div>
+                    <div class="metric-desc">Improvement in test coverage and execution speed with automated testing agents</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">80%</div>
+                    <div class="metric-label">Deployment Success</div>
+                    <div class="metric-desc">Increase in successful deployments through intelligent DevOps automation</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="implementation-example">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Complete Development Workflow Agent</h3>
+            
+            <div class="code-content">
+                <div class="code-header">
+                    <div>
+                        <i class="fas fa-code"></i>
+                        Full-Stack Development Agent Implementation
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.7;">Python + LangChain + GitHub API</div>
+                </div>
+                <div class="code-body">
+<pre><code class="language-python">from langchain.agents import Agent, Tool
+from langchain.llms import OpenAI
+from langchain.memory import ConversationBufferMemory
+import subprocess
+import os
+import requests
+from typing import List, Dict, Any
+
+class DevelopmentWorkflowAgent:
+    """Comprehensive AI agent for software development workflows"""
+    
+    def __init__(self, github_token: str, openai_api_key: str):
+        self.github_token = github_token
+        self.llm = OpenAI(api_key=openai_api_key, temperature=0.1)
+        self.memory = ConversationBufferMemory()
+        self.setup_tools()
+        self.setup_agents()
+    
+    def setup_tools(self):
+        """Setup development tools for the agent"""
+        
+        self.tools = [
+            Tool(
+                name="code_generator",
+                description="Generate code based on requirements and specifications",
+                func=self.generate_code
+            ),
+            Tool(
+                name="code_reviewer",
+                description="Review code for quality, security, and best practices",
+                func=self.review_code
+            ),
+            Tool(
+                name="test_generator",
+                description="Generate comprehensive test cases for given code",
+                func=self.generate_tests
+            ),
+            Tool(
+                name="bug_detector",
+                description="Analyze code for potential bugs and issues",
+                func=self.detect_bugs
+            ),
+            Tool(
+                name="performance_analyzer",
+                description="Analyze code performance and suggest optimizations",
+                func=self.analyze_performance
+            ),
+            Tool(
+                name="documentation_generator",
+                description="Generate documentation from code and comments",
+                func=self.generate_documentation
+            ),
+            Tool(
+                name="deployment_manager",
+                description="Manage deployment processes and configurations",
+                func=self.manage_deployment
+            ),
+            Tool(
+                name="github_integrator",
+                description="Integrate with GitHub for repository management",
+                func=self.github_integration
+            )
+        ]
+    
+    def setup_agents(self):
+        """Setup specialized development agents"""
+        
+        # Code Generation Agent
+        self.code_agent = Agent(
+            llm=self.llm,
+            tools=[self.tools[0], self.tools[5]],  # code_generator, documentation_generator
+            memory=self.memory,
+            system_message="""You are a senior software engineer specializing in code generation.
+            You write clean, efficient, well-documented code following best practices.
+            Always include proper error handling and consider edge cases."""
+        )
+        
+        # Quality Assurance Agent
+        self.qa_agent = Agent(
+            llm=self.llm,
+            tools=[self.tools[1], self.tools[2], self.tools[3]],  # reviewer, test_generator, bug_detector
+            memory=self.memory,
+            system_message="""You are a QA engineer focused on code quality and testing.
+            You ensure code meets quality standards, is properly tested, and is free of bugs.
+            You provide detailed feedback and actionable recommendations."""
+        )
+        
+        # DevOps Agent
+        self.devops_agent = Agent(
+            llm=self.llm,
+            tools=[self.tools[4], self.tools[6], self.tools[7]],  # performance_analyzer, deployment_manager, github_integrator
+            memory=self.memory,
+            system_message="""You are a DevOps engineer specializing in deployment and operations.
+            You optimize performance, manage deployments, and ensure system reliability.
+            You focus on automation, monitoring, and continuous improvement."""
+        )
+    
+    def generate_code(self, requirements: str) -> str:
+        """Generate code based on requirements"""
+        
+        prompt = f"""
+        Generate high-quality code based on these requirements:
+        {requirements}
+        
+        Requirements:
+        - Follow best practices and design patterns
+        - Include proper error handling
+        - Add comprehensive comments
+        - Consider edge cases and validation
+        - Make code modular and reusable
+        
+        Provide the complete implementation with explanations.
+        """
+        
+        response = self.llm(prompt)
+        return response
+    
+    def review_code(self, code: str) -> str:
+        """Review code for quality and best practices"""
+        
+        prompt = f"""
+        Review this code for quality, security, and best practices:
+        
+        {code}
+        
+        Analyze:
+        - Code quality and readability
+        - Security vulnerabilities
+        - Performance issues
+        - Best practices adherence
+        - Potential bugs or edge cases
+        - Suggestions for improvement
+        
+        Provide detailed feedback with specific recommendations.
+        """
+        
+        response = self.llm(prompt)
+        return response
+    
+    def generate_tests(self, code: str) -> str:
+        """Generate comprehensive test cases"""
+        
+        prompt = f"""
+        Generate comprehensive test cases for this code:
+        
+        {code}
+        
+        Include:
+        - Unit tests for all functions/methods
+        - Edge case testing
+        - Error condition testing
+        - Integration tests where applicable
+        - Performance tests if relevant
+        - Mock objects for dependencies
+        
+        Use appropriate testing framework and follow testing best practices.
+        """
+        
+        response = self.llm(prompt)
+        return response
+    
+    def detect_bugs(self, code: str) -> str:
+        """Analyze code for potential bugs"""
+        
+        prompt = f"""
+        Analyze this code for potential bugs and issues:
+        
+        {code}
+        
+        Look for:
+        - Logic errors
+        - Memory leaks
+        - Race conditions
+        - Null pointer exceptions
+        - Buffer overflows
+        - Input validation issues
+        - Error handling problems
+        
+        Provide specific locations and fix suggestions.
+        """
+        
+        response = self.llm(prompt)
+        return response
+    
+    def analyze_performance(self, code: str) -> str:
+        """Analyze code performance and suggest optimizations"""
+        
+        prompt = f"""
+        Analyze this code for performance issues and optimizations:
+        
+        {code}
+        
+        Evaluate:
+        - Time complexity
+        - Space complexity
+        - Algorithm efficiency
+        - Database query optimization
+        - Caching opportunities
+        - Bottlenecks and hotspots
+        
+        Provide specific optimization recommendations.
+        """
+        
+        response = self.llm(prompt)
+        return response
+    
+    def generate_documentation(self, code: str) -> str:
+        """Generate documentation from code"""
+        
+        prompt = f"""
+        Generate comprehensive documentation for this code:
+        
+        {code}
+        
+        Include:
+        - API documentation
+        - Function/method descriptions
+        - Parameter explanations
+        - Return value descriptions
+        - Usage examples
+        - Installation instructions
+        - Configuration details
+        
+        Format as markdown with clear structure.
+        """
+        
+        response = self.llm(prompt)
+        return response
+    
+    def manage_deployment(self, deployment_config: str) -> str:
+        """Manage deployment processes"""
+        
+        prompt = f"""
+        Create deployment strategy and configuration:
+        
+        {deployment_config}
+        
+        Include:
+        - Deployment pipeline steps
+        - Environment configurations
+        - Health checks and monitoring
+        - Rollback procedures
+        - Security considerations
+        - Performance monitoring
+        
+        Provide complete deployment automation scripts.
+        """
+        
+        response = self.llm(prompt)
+        return response
+    
+    def github_integration(self, action: str) -> str:
+        """Integrate with GitHub for repository management"""
+        
+        # Implement GitHub API integration
+        headers = {
+            'Authorization': f'token {self.github_token}',
+            'Accept': 'application/vnd.github.v3+json'
+        }
+        
+        if action.startswith('create_pr'):
+            # Create pull request logic
+            return "Pull request created successfully"
+        elif action.startswith('review_pr'):
+            # Review pull request logic
+            return "Pull request reviewed"
+        elif action.startswith('merge_pr'):
+            # Merge pull request logic
+            return "Pull request merged"
+        
+        return f"GitHub action completed: {action}"
+    
+    def complete_development_workflow(self, requirements: str) -> Dict[str, Any]:
+        """Execute complete development workflow"""
+        
+        workflow_results = {}
+        
+        # Step 1: Generate code
+        print("🔄 Generating code...")
+        code = self.code_agent.run(f"Generate code for: {requirements}")
+        workflow_results['generated_code'] = code
+        
+        # Step 2: Review code quality
+        print("🔍 Reviewing code quality...")
+        review = self.qa_agent.run(f"Review this code: {code}")
+        workflow_results['code_review'] = review
+        
+        # Step 3: Generate tests
+        print("🧪 Generating tests...")
+        tests = self.qa_agent.run(f"Generate tests for: {code}")
+        workflow_results['generated_tests'] = tests
+        
+        # Step 4: Analyze performance
+        print("⚡ Analyzing performance...")
+        performance = self.devops_agent.run(f"Analyze performance of: {code}")
+        workflow_results['performance_analysis'] = performance
+        
+        # Step 5: Generate documentation
+        print("📚 Generating documentation...")
+        docs = self.code_agent.run(f"Generate documentation for: {code}")
+        workflow_results['documentation'] = docs
+        
+        # Step 6: Prepare deployment
+        print("🚀 Preparing deployment...")
+        deployment = self.devops_agent.run(f"Create deployment strategy for: {code}")
+        workflow_results['deployment_strategy'] = deployment
+        
+        return workflow_results
+    
+    def continuous_integration_workflow(self, repo_url: str, branch: str) -> Dict[str, Any]:
+        """Execute CI/CD workflow"""
+        
+        ci_results = {}
+        
+        # Clone repository
+        print("📥 Cloning repository...")
+        subprocess.run(['git', 'clone', repo_url, 'temp_repo'])
+        
+        # Switch to branch
+        os.chdir('temp_repo')
+        subprocess.run(['git', 'checkout', branch])
+        
+        # Read code files
+        code_files = []
+        for root, dirs, files in os.walk('.'):
+            for file in files:
+                if file.endswith(('.py', '.js', '.java', '.cpp', '.c')):
+                    with open(os.path.join(root, file), 'r') as f:
+                        code_files.append({
+                            'file': file,
+                            'content': f.read()
+                        })
+        
+        # Analyze each file
+        for file_info in code_files:
+            print(f"🔍 Analyzing {file_info['file']}...")
+            
+            # Code review
+            review = self.review_code(file_info['content'])
+            
+            # Bug detection
+            bugs = self.detect_bugs(file_info['content'])
+            
+            # Performance analysis
+            performance = self.analyze_performance(file_info['content'])
+            
+            ci_results[file_info['file']] = {
+                'review': review,
+                'bugs': bugs,
+                'performance': performance
+            }
+        
+        # Cleanup
+        os.chdir('..')
+        subprocess.run(['rm', '-rf', 'temp_repo'])
+        
+        return ci_results
+
+# Usage example
+def main():
+    # Initialize development agent
+    dev_agent = DevelopmentWorkflowAgent(
+        github_token="your_github_token",
+        openai_api_key="your_openai_key"
+    )
+    
+    # Complete development workflow
+    requirements = """
+    Create a REST API for a task management system with the following features:
+    - User authentication and authorization
+    - CRUD operations for tasks
+    - Task assignment and collaboration
+    - Real-time notifications
+    - Data persistence with PostgreSQL
+    - Comprehensive error handling
+    - API documentation
+    """
+    
+    results = dev_agent.complete_development_workflow(requirements)
+    
+    print("✅ Development workflow completed!")
+    print(f"Generated code: {len(results['generated_code'])} characters")
+    print(f"Code review: {len(results['code_review'])} characters")
+    print(f"Tests generated: {len(results['generated_tests'])} characters")
+    
+    # CI/CD workflow example
+    ci_results = dev_agent.continuous_integration_workflow(
+        "https://github.com/user/repo.git",
+        "feature-branch"
+    )
+    
+    print("✅ CI/CD workflow completed!")
+    print(f"Analyzed {len(ci_results)} files")
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

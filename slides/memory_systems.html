@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #10b981;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .memory-overview {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .memory-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .memory-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .memory-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .memory-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .memory-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+        }
+        .short-term-card { border-top-color: #3b82f6; }
+        .long-term-card { border-top-color: #8b5cf6; }
+        
+        .memory-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .memory-type-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 16px;
+        }
+        .short-term-icon { background: #3b82f6; }
+        .long-term-icon { background: #8b5cf6; }
+        
+        .memory-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .memory-desc {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .memory-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .feature-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .code-example {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 10px;
+            margin-top: 12px;
+        }
+        .implementation-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .implementation-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .impl-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid;
+        }
+        .buffer-card { border-top-color: #3b82f6; }
+        .vector-card { border-top-color: #10b981; }
+        .graph-card { border-top-color: #f59e0b; }
+        
+        .impl-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .impl-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .buffer-icon { background: #3b82f6; }
+        .vector-icon { background: #10b981; }
+        .graph-icon { background: #f59e0b; }
+        
+        .impl-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .impl-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .impl-examples {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .example-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #475569;
+        }
+        .example-bullet {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .optimization-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .optimization-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .optimization-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .optimization-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #06b6d4;
+            display: flex;
+            align-items: center;
+        }
+        .optimization-icon {
+            margin-right: 8px;
+        }
+        .optimization-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .technique-desc {
+            font-size: 11px;
+            opacity: 0.7;
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Memory Systems and State Management</h1>
+            <p class="text-lg text-gray-600">Persistent Context, Knowledge Storage, and State Persistence</p>
+        </div>
+        
+        <div class="memory-overview">
+            <div class="memory-icon">
+                <i class="fas fa-database"></i>
+            </div>
+            <div class="memory-content">
+                <h3>Intelligent Memory Management</h3>
+                <p>
+                    Memory systems enable agents to maintain context across interactions, learn from experience, 
+                    and access relevant information efficiently for better decision-making and continuity.
+                </p>
+            </div>
+        </div>
+        
+        <div class="memory-types">
+            <div class="memory-card short-term-card">
+                <div class="memory-header">
+                    <div class="memory-type-icon short-term-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="memory-title">Short-Term Memory</div>
+                </div>
+                <div class="memory-desc">
+                    Temporary storage for current conversation context, recent interactions, and working information 
+                    that needs to be readily accessible during active sessions.
+                </div>
+                
+                <ul class="memory-features">
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Conversation buffer management
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Session-based context retention
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Fast access and retrieval
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Automatic cleanup and expiration
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Token limit management
+                    </li>
+                </ul>
+                
+                <div class="code-example">
+from langchain.memory import ConversationBufferMemory
+
+# Basic conversation buffer
+memory = ConversationBufferMemory(
+    memory_key="chat_history",
+    return_messages=True,
+    max_token_limit=2000
+)
+
+# Window-based memory
+window_memory = ConversationBufferWindowMemory(
+    k=5,  # Keep last 5 exchanges
+    return_messages=True
+)
+
+# Summary memory for long conversations
+summary_memory = ConversationSummaryMemory(
+    llm=llm,
+    max_token_limit=1000
+)
+                </div>
+            </div>
+            
+            <div class="memory-card long-term-card">
+                <div class="memory-header">
+                    <div class="memory-type-icon long-term-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <div class="memory-title">Long-Term Memory</div>
+                </div>
+                <div class="memory-desc">
+                    Persistent storage for learned knowledge, user preferences, historical patterns, and 
+                    accumulated experience that persists across sessions and interactions.
+                </div>
+                
+                <ul class="memory-features">
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Vector embeddings storage
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Semantic search capabilities
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Knowledge graph integration
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        User preference learning
+                    </li>
+                    <li class="feature-item">
+                        <div class="feature-bullet"></div>
+                        Cross-session persistence
+                    </li>
+                </ul>
+                
+                <div class="code-example">
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+
+# Vector store for long-term memory
+embeddings = OpenAIEmbeddings()
+vectorstore = Chroma(
+    collection_name="agent_memory",
+    embedding_function=embeddings,
+    persist_directory="./memory_db"
+)
+
+# Store and retrieve memories
+def store_memory(content, metadata=None):
+    vectorstore.add_texts(
+        texts=[content],
+        metadatas=[metadata or {}]
+    )
+
+def retrieve_memories(query, k=5):
+    return vectorstore.similarity_search(
+        query, k=k
+    )
+
+# Knowledge graph memory
+class KnowledgeGraphMemory:
+    def __init__(self):
+        self.graph = nx.DiGraph()
+    
+    def add_fact(self, subject, predicate, object):
+        self.graph.add_edge(subject, object, 
+                          relation=predicate)
+                </div>
+            </div>
+        </div>
+        
+        <div class="implementation-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Implementation Strategies</h3>
+            <div class="implementation-grid">
+                <div class="impl-card buffer-card">
+                    <div class="impl-header">
+                        <div class="impl-icon buffer-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="impl-title">Buffer-Based Memory</div>
+                    </div>
+                    <div class="impl-desc">
+                        Simple FIFO or sliding window approaches for managing conversation history and recent context.
+                    </div>
+                    <ul class="impl-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Conversation buffer memory
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Token-aware truncation
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Sliding window context
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Summary-based compression
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="impl-card vector-card">
+                    <div class="impl-header">
+                        <div class="impl-icon vector-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="impl-title">Vector-Based Memory</div>
+                    </div>
+                    <div class="impl-desc">
+                        Semantic similarity search using embeddings for intelligent information retrieval and context matching.
+                    </div>
+                    <ul class="impl-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Semantic similarity search
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Embedding-based retrieval
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Contextual relevance scoring
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Multi-modal embeddings
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="impl-card graph-card">
+                    <div class="impl-header">
+                        <div class="impl-icon graph-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="impl-title">Graph-Based Memory</div>
+                    </div>
+                    <div class="impl-desc">
+                        Structured knowledge representation using graphs for complex relationship modeling and reasoning.
+                    </div>
+                    <ul class="impl-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Entity relationship modeling
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Knowledge graph traversal
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Reasoning over connections
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Temporal relationship tracking
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-top: 20px;">
+                <h4 class="font-semibold text-gray-800 mb-3">Complete Memory System Example</h4>
+                <div style="background: #1e293b; color: #e2e8f0; border-radius: 6px; padding: 12px; font-family: 'Fira Code', monospace; font-size: 10px;">
+<pre>class HybridMemorySystem:
+    def __init__(self):
+        # Short-term: Conversation buffer
+        self.conversation_memory = ConversationBufferWindowMemory(k=10)
+        
+        # Long-term: Vector store
+        self.vector_memory = Chroma(embedding_function=OpenAIEmbeddings())
+        
+        # Structured: Knowledge graph
+        self.knowledge_graph = KnowledgeGraphMemory()
+        
+        # User preferences
+        self.user_preferences = UserPreferenceStore()
+    
+    def store_interaction(self, user_input, agent_response, context=None):
+        # Store in conversation buffer
+        self.conversation_memory.save_context(
+            {"input": user_input}, 
+            {"output": agent_response}
+        )
+        
+        # Extract and store important information
+        if self.is_important(user_input, agent_response):
+            self.vector_memory.add_texts([f"{user_input} -> {agent_response}"])
+            
+        # Update knowledge graph
+        entities = self.extract_entities(user_input, agent_response)
+        self.knowledge_graph.update_from_entities(entities)
+    
+    def retrieve_relevant_context(self, query):
+        # Get recent conversation
+        recent_context = self.conversation_memory.load_memory_variables({})
+        
+        # Search long-term memory
+        relevant_memories = self.vector_memory.similarity_search(query, k=3)
+        
+        # Query knowledge graph
+        related_facts = self.knowledge_graph.get_related_facts(query)
+        
+        return {
+            "recent": recent_context,
+            "memories": relevant_memories,
+            "facts": related_facts
+        }</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="optimization-section">
+            <h3 class="text-xl font-bold mb-2">Performance Optimization Techniques</h3>
+            <div class="optimization-grid">
+                <div class="optimization-item">
+                    <div class="optimization-title">
+                        <i class="fas fa-compress-alt optimization-icon"></i>
+                        Memory Compression
+                    </div>
+                    <div class="optimization-desc">
+                        Reduce memory footprint while preserving essential information through intelligent compression.
+                    </div>
+                    <div class="technique-desc">
+                        Techniques: Summarization, key information extraction, lossy compression for old data
+                    </div>
+                </div>
+                <div class="optimization-item">
+                    <div class="optimization-title">
+                        <i class="fas fa-layer-group optimization-icon"></i>
+                        Hierarchical Storage
+                    </div>
+                    <div class="optimization-desc">
+                        Implement tiered storage with different access patterns and retention policies.
+                    </div>
+                    <div class="technique-desc">
+                        Techniques: Hot/warm/cold storage tiers, automatic data migration, access pattern analysis
+                    </div>
+                </div>
+                <div class="optimization-item">
+                    <div class="optimization-title">
+                        <i class="fas fa-bolt optimization-icon"></i>
+                        Caching Strategies
+                    </div>
+                    <div class="optimization-desc">
+                        Implement intelligent caching for frequently accessed memories and computed results.
+                    </div>
+                    <div class="technique-desc">
+                        Techniques: LRU caching, semantic caching, precomputed embeddings, query result caching
+                    </div>
+                </div>
+                <div class="optimization-item">
+                    <div class="optimization-title">
+                        <i class="fas fa-broom optimization-icon"></i>
+                        Memory Cleanup
+                    </div>
+                    <div class="optimization-desc">
+                        Automatic cleanup of outdated, irrelevant, or redundant information to maintain efficiency.
+                    </div>
+                    <div class="technique-desc">
+                        Techniques: TTL-based expiration, relevance scoring, duplicate detection, privacy compliance
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

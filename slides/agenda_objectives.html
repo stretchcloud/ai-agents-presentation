@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 60px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #3b82f6;
+            transition: transform 0.2s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .section-title {
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .skill-item {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-left: 3px solid #06b6d4;
+            color: #334155;
+        }
+        .icon-wrapper {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .progress-step {
+            display: flex;
+            align-items: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3b82f6;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Agenda and Learning Objectives</h1>
+            <p class="text-lg text-gray-600">What You'll Master in This Technical Deep Dive</p>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-6 flex-1">
+            <div class="space-y-4">
+                <div class="section-card">
+                    <div class="flex items-start">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-brain text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="section-title text-xl">Technical Skills You'll Acquire</h3>
+                            <div class="skill-item">
+                                <strong>Agent Architectures:</strong> Deep understanding of ReAct, HTN, and multi-agent patterns
+                            </div>
+                            <div class="skill-item">
+                                <strong>Framework Mastery:</strong> Hands-on with LangChain, LangGraph, AutoGen, and CrewAI
+                            </div>
+                            <div class="skill-item">
+                                <strong>Implementation Patterns:</strong> Memory systems, tool integration, and state management
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-card">
+                    <div class="flex items-start">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-code text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="section-title text-xl">Practical Implementation</h3>
+                            <div class="skill-item">
+                                <strong>Code Examples:</strong> Production-ready Python and JavaScript implementations
+                            </div>
+                            <div class="skill-item">
+                                <strong>Architecture Patterns:</strong> Scalable, maintainable agent system designs
+                            </div>
+                            <div class="skill-item">
+                                <strong>Best Practices:</strong> Testing, debugging, and deployment strategies
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="section-card">
+                    <div class="flex items-start">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-rocket text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="section-title text-xl">Real-World Applications</h3>
+                            <div class="skill-item">
+                                <strong>Development Workflows:</strong> Code generation, testing automation, DevOps integration
+                            </div>
+                            <div class="skill-item">
+                                <strong>Enterprise Solutions:</strong> Customer service, business process automation
+                            </div>
+                            <div class="skill-item">
+                                <strong>Industry Use Cases:</strong> Financial services, healthcare, e-commerce applications
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-card">
+                    <div class="flex items-start">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-chart-line text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="section-title text-xl">Performance & Optimization</h3>
+                            <div class="skill-item">
+                                <strong>Performance Metrics:</strong> Measurement frameworks and success indicators
+                            </div>
+                            <div class="skill-item">
+                                <strong>Optimization Techniques:</strong> Memory management, computational efficiency
+                            </div>
+                            <div class="skill-item">
+                                <strong>Production Deployment:</strong> Scaling, monitoring, and maintenance strategies
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-indicator">
+            <div class="progress-step">
+                <div class="progress-dot"></div>
+                <span>Foundations (6 slides)</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-dot"></div>
+                <span>Agent Types (5 slides)</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-dot"></div>
+                <span>Architecture (6 slides)</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-dot"></div>
+                <span>Frameworks (4 slides)</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-dot"></div>
+                <span>Applications (4 slides)</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-dot"></div>
+                <span>Best Practices (3 slides)</span>
+            </div>
+            <div class="progress-step">
+                <div class="progress-dot"></div>
+                <span>Future Outlook (1 slide)</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

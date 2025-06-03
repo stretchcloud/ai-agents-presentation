@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #8b5cf6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .planning-overview {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .planning-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .planning-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .planning-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .planning-types {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .planning-algorithms {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .algorithm-item {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #8b5cf6;
+        }
+        .algorithm-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        .algorithm-desc {
+            color: #64748b;
+            font-size: 12px;
+        }
+        .code-section {
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .code-header i {
+            margin-right: 8px;
+            color: #8b5cf6;
+        }
+        .code-content {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .reasoning-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .reasoning-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .reasoning-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid;
+        }
+        .chain-card { border-top-color: #3b82f6; }
+        .tree-card { border-top-color: #10b981; }
+        .graph-card { border-top-color: #f59e0b; }
+        
+        .reasoning-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .reasoning-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .chain-icon { background: #3b82f6; }
+        .tree-icon { background: #10b981; }
+        .graph-icon { background: #f59e0b; }
+        
+        .reasoning-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .reasoning-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .reasoning-examples {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .example-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #475569;
+        }
+        .example-bullet {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .optimization-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .optimization-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .optimization-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .optimization-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #06b6d4;
+            display: flex;
+            align-items: center;
+        }
+        .optimization-icon {
+            margin-right: 8px;
+        }
+        .optimization-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .technique-desc {
+            font-size: 11px;
+            opacity: 0.7;
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Planning and Reasoning Engines</h1>
+            <p class="text-lg text-gray-600">Decision-Making Algorithms and Intelligent Problem Solving</p>
+        </div>
+        
+        <div class="planning-overview">
+            <div class="planning-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="planning-content">
+                <h3>Intelligent Decision Making</h3>
+                <p>
+                    Planning and reasoning engines enable AI agents to make complex decisions, solve multi-step 
+                    problems, and optimize actions based on goals, constraints, and available information.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="planning-types">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">Planning Algorithms</h3>
+                
+                <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #8b5cf6;">
+                    <strong>Core Planning Process:</strong><br>
+                    Goal Definition → State Analysis → Action Generation → Path Optimization → Execution
+                </div>
+                
+                <div class="planning-algorithms">
+                    <div class="algorithm-item">
+                        <div class="algorithm-title">Forward State-Space Search</div>
+                        <div class="algorithm-desc">Search from initial state toward goal using breadth-first, depth-first, or A* algorithms</div>
+                    </div>
+                    <div class="algorithm-item">
+                        <div class="algorithm-title">Backward Goal Regression</div>
+                        <div class="algorithm-desc">Work backwards from goal to find necessary preconditions and actions</div>
+                    </div>
+                    <div class="algorithm-item">
+                        <div class="algorithm-title">Hierarchical Task Networks (HTN)</div>
+                        <div class="algorithm-desc">Decompose complex tasks into simpler subtasks with hierarchical planning</div>
+                    </div>
+                    <div class="algorithm-item">
+                        <div class="algorithm-title">Partial Order Planning</div>
+                        <div class="algorithm-desc">Plan actions without committing to specific execution order until necessary</div>
+                    </div>
+                    <div class="algorithm-item">
+                        <div class="algorithm-title">Monte Carlo Tree Search</div>
+                        <div class="algorithm-desc">Use random sampling to explore possible action sequences and outcomes</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <i class="fas fa-code"></i>
+                    Planning Engine Implementation
+                </div>
+                <div class="code-content">
+<pre><code class="language-python">class PlanningEngine:
+    def __init__(self):
+        self.state_space = StateSpace()
+        self.action_library = ActionLibrary()
+        self.heuristics = HeuristicFunctions()
+        
+    def plan(self, initial_state, goal_state, constraints=None):
+        """Generate optimal action sequence to reach goal"""
+        # Initialize search
+        frontier = PriorityQueue()
+        frontier.put((0, initial_state, []))
+        explored = set()
+        
+        while not frontier.empty():
+            cost, current_state, actions = frontier.get()
+            
+            if self.is_goal_state(current_state, goal_state):
+                return self.optimize_plan(actions)
+            
+            if current_state in explored:
+                continue
+                
+            explored.add(current_state)
+            
+            # Generate successor states
+            for action in self.get_applicable_actions(current_state):
+                if self.satisfies_constraints(action, constraints):
+                    new_state = self.apply_action(current_state, action)
+                    new_cost = cost + self.action_cost(action)
+                    heuristic = self.heuristics.estimate(new_state, goal_state)
+                    
+                    frontier.put((
+                        new_cost + heuristic,
+                        new_state,
+                        actions + [action]
+                    ))
+        
+        return None  # No plan found
+
+class HierarchicalPlanner:
+    def __init__(self):
+        self.task_network = TaskNetwork()
+        self.method_library = MethodLibrary()
+        
+    def decompose_task(self, high_level_task):
+        """Hierarchical task decomposition"""
+        if self.is_primitive_task(high_level_task):
+            return [high_level_task]
+        
+        # Find applicable decomposition methods
+        methods = self.method_library.get_methods(high_level_task)
+        
+        for method in methods:
+            if self.preconditions_satisfied(method):
+                subtasks = method.decompose(high_level_task)
+                
+                # Recursively decompose subtasks
+                plan = []
+                for subtask in subtasks:
+                    subplan = self.decompose_task(subtask)
+                    plan.extend(subplan)
+                
+                return plan
+        
+        return None  # No applicable method found
+
+class ReasoningEngine:
+    def __init__(self):
+        self.knowledge_base = KnowledgeBase()
+        self.inference_engine = InferenceEngine()
+        self.belief_state = BeliefState()
+        
+    def reason_about_action(self, action, current_state):
+        """Reason about action effects and consequences"""
+        # Predict immediate effects
+        predicted_effects = self.predict_effects(action, current_state)
+        
+        # Reason about side effects
+        side_effects = self.infer_side_effects(action, predicted_effects)
+        
+        # Evaluate action utility
+        utility = self.evaluate_utility(predicted_effects, side_effects)
+        
+        return {
+            'effects': predicted_effects,
+            'side_effects': side_effects,
+            'utility': utility,
+            'confidence': self.calculate_confidence(action)
+        }
+    
+    def chain_of_thought_reasoning(self, problem):
+        """Step-by-step reasoning process"""
+        reasoning_chain = []
+        current_problem = problem
+        
+        while not self.is_solved(current_problem):
+            # Generate next reasoning step
+            step = self.generate_reasoning_step(current_problem)
+            reasoning_chain.append(step)
+            
+            # Apply reasoning step
+            current_problem = self.apply_reasoning_step(
+                current_problem, step
+            )
+            
+            # Check for contradictions or dead ends
+            if self.has_contradiction(current_problem):
+                return self.backtrack_reasoning(reasoning_chain)
+        
+        return reasoning_chain
+
+# Example usage
+planner = PlanningEngine()
+plan = planner.plan(
+    initial_state={"location": "home", "has_keys": True},
+    goal_state={"location": "office", "task_completed": True},
+    constraints={"time_limit": 60, "budget": 20}
+)
+
+reasoner = ReasoningEngine()
+action_analysis = reasoner.reason_about_action(
+    action="drive_to_office",
+    current_state={"location": "home", "fuel": 0.8}
+)
+</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="reasoning-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Reasoning Patterns</h3>
+            <div class="reasoning-grid">
+                <div class="reasoning-card chain-card">
+                    <div class="reasoning-header">
+                        <div class="reasoning-icon chain-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="reasoning-title">Chain-of-Thought</div>
+                    </div>
+                    <div class="reasoning-desc">
+                        Sequential reasoning where each step builds on the previous, creating a logical chain 
+                        from problem to solution.
+                    </div>
+                    <ul class="reasoning-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Step-by-step problem decomposition
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Logical inference chains
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Mathematical problem solving
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Causal reasoning
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="reasoning-card tree-card">
+                    <div class="reasoning-header">
+                        <div class="reasoning-icon tree-icon">
+                            <i class="fas fa-sitemap"></i>
+                        </div>
+                        <div class="reasoning-title">Tree-of-Thought</div>
+                    </div>
+                    <div class="reasoning-desc">
+                        Explore multiple reasoning paths simultaneously, evaluating different approaches 
+                        and selecting the most promising branches.
+                    </div>
+                    <ul class="reasoning-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Parallel hypothesis exploration
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Branch evaluation and pruning
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Multi-path problem solving
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Creative solution generation
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="reasoning-card graph-card">
+                    <div class="reasoning-header">
+                        <div class="reasoning-icon graph-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="reasoning-title">Graph-of-Thought</div>
+                    </div>
+                    <div class="reasoning-desc">
+                        Non-linear reasoning using graph structures to represent complex relationships 
+                        and interconnected concepts.
+                    </div>
+                    <ul class="reasoning-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Concept relationship mapping
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Circular and recursive reasoning
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Knowledge graph traversal
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Complex system analysis
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-top: 20px;">
+                <h4 class="font-semibold text-gray-800 mb-3">Advanced Reasoning Techniques</h4>
+                <div style="background: #1e293b; color: #e2e8f0; border-radius: 6px; padding: 12px; font-family: 'Fira Code', monospace; font-size: 10px;">
+<pre>class AdvancedReasoner:
+    def __init__(self):
+        self.reasoning_strategies = {
+            'deductive': DeductiveReasoning(),
+            'inductive': InductiveReasoning(),
+            'abductive': AbductiveReasoning(),
+            'analogical': AnalogicalReasoning()
+        }
+    
+    def multi_strategy_reasoning(self, problem):
+        results = {}
+        for strategy_name, strategy in self.reasoning_strategies.items():
+            results[strategy_name] = strategy.reason(problem)
+        
+        # Combine and validate results
+        return self.synthesize_reasoning(results)
+    
+    def meta_reasoning(self, problem):
+        """Reason about which reasoning strategy to use"""
+        problem_type = self.classify_problem(problem)
+        strategy = self.select_strategy(problem_type)
+        return strategy.reason(problem)</pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="optimization-section">
+            <h3 class="text-xl font-bold mb-2">Optimization and Performance</h3>
+            <div class="optimization-grid">
+                <div class="optimization-item">
+                    <div class="optimization-title">
+                        <i class="fas fa-tachometer-alt optimization-icon"></i>
+                        Computational Efficiency
+                    </div>
+                    <div class="optimization-desc">
+                        Optimize planning algorithms for real-time performance while maintaining solution quality.
+                    </div>
+                    <div class="technique-desc">
+                        Techniques: Heuristic search, beam search, anytime algorithms, parallel processing
+                    </div>
+                </div>
+                <div class="optimization-item">
+                    <div class="optimization-title">
+                        <i class="fas fa-cut optimization-icon"></i>
+                        Search Space Pruning
+                    </div>
+                    <div class="optimization-desc">
+                        Reduce search complexity by eliminating unpromising branches and states early.
+                    </div>
+                    <div class="technique-desc">
+                        Techniques: Alpha-beta pruning, constraint propagation, symmetry breaking
+                    </div>
+                </div>
+                <div class="optimization-item">
+                    <div class="optimization-title">
+                        <i class="fas fa-memory optimization-icon"></i>
+                        Memory Management
+                    </div>
+                    <div class="optimization-desc">
+                        Efficient memory usage for large state spaces and complex planning problems.
+                    </div>
+                    <div class="technique-desc">
+                        Techniques: State compression, lazy evaluation, incremental planning
+                    </div>
+                </div>
+                <div class="optimization-item">
+                    <div class="optimization-title">
+                        <i class="fas fa-balance-scale optimization-icon"></i>
+                        Quality vs Speed Trade-offs
+                    </div>
+                    <div class="optimization-desc">
+                        Balance solution quality with computational time based on application requirements.
+                    </div>
+                    <div class="technique-desc">
+                        Techniques: Bounded rationality, satisficing, approximate algorithms
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

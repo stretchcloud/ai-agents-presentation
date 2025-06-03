@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .learning-overview {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .learning-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .learning-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .learning-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .architecture-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .learning-components {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .component-item {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #3b82f6;
+        }
+        .component-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+        .component-desc {
+            color: #64748b;
+            font-size: 12px;
+        }
+        .code-section {
+            background: #1e293b;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .code-header i {
+            margin-right: 8px;
+            color: #3b82f6;
+        }
+        .code-content {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .learning-types {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .types-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .type-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid;
+        }
+        .supervised-card { border-top-color: #10b981; }
+        .unsupervised-card { border-top-color: #f59e0b; }
+        .reinforcement-card { border-top-color: #8b5cf6; }
+        
+        .type-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .type-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .supervised-icon { background: #10b981; }
+        .unsupervised-icon { background: #f59e0b; }
+        .reinforcement-icon { background: #8b5cf6; }
+        
+        .type-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .type-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .type-examples {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .example-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 11px;
+            color: #475569;
+        }
+        .example-bullet {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .challenges-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .challenge-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .challenge-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+        }
+        .challenge-icon {
+            margin-right: 8px;
+        }
+        .challenge-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .solution-desc {
+            font-size: 11px;
+            opacity: 0.7;
+            color: #06b6d4;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Learning Agents - The Most Advanced Type</h1>
+            <p class="text-lg text-gray-600">Adaptive Intelligence Through Experience and Feedback</p>
+        </div>
+        
+        <div class="learning-overview">
+            <div class="learning-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="learning-content">
+                <h3>Adaptive Intelligence</h3>
+                <p>
+                    Learning agents continuously improve their performance through experience, feedback, and 
+                    self-modification. They represent the pinnacle of agent intelligence, capable of adaptation 
+                    and evolution in dynamic environments.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="architecture-section">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">Learning Agent Architecture</h3>
+                
+                <div style="background: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #3b82f6;">
+                    <strong>Core Learning Loop:</strong><br>
+                    Experience → Learning → Knowledge Update → Improved Performance
+                </div>
+                
+                <div class="learning-components">
+                    <div class="component-item">
+                        <div class="component-title">Performance Element</div>
+                        <div class="component-desc">Executes actions based on current knowledge and policies</div>
+                    </div>
+                    <div class="component-item">
+                        <div class="component-title">Learning Element</div>
+                        <div class="component-desc">Analyzes feedback and updates knowledge base</div>
+                    </div>
+                    <div class="component-item">
+                        <div class="component-title">Critic</div>
+                        <div class="component-desc">Evaluates performance and provides feedback signals</div>
+                    </div>
+                    <div class="component-item">
+                        <div class="component-title">Problem Generator</div>
+                        <div class="component-desc">Suggests exploratory actions for learning opportunities</div>
+                    </div>
+                    <div class="component-item">
+                        <div class="component-title">Knowledge Base</div>
+                        <div class="component-desc">Stores learned patterns, rules, and experiences</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <i class="fas fa-code"></i>
+                    Learning Agent Implementation
+                </div>
+                <div class="code-content">
+<pre><code class="language-python">class LearningAgent:
+    def __init__(self, learning_rate=0.1, exploration_rate=0.1):
+        self.knowledge_base = {}
+        self.experience_buffer = []
+        self.learning_rate = learning_rate
+        self.exploration_rate = exploration_rate
+        self.performance_history = []
+        
+    def act(self, state):
+        """Choose action based on current knowledge and exploration"""
+        if random.random() < self.exploration_rate:
+            # Exploration: try new actions
+            action = self.explore_action(state)
+        else:
+            # Exploitation: use best known action
+            action = self.best_action(state)
+        
+        return action
+    
+    def learn_from_experience(self, state, action, reward, next_state):
+        """Update knowledge based on experience"""
+        experience = {
+            'state': state,
+            'action': action,
+            'reward': reward,
+            'next_state': next_state,
+            'timestamp': time.time()
+        }
+        
+        self.experience_buffer.append(experience)
+        
+        # Update knowledge using various learning methods
+        self.update_q_values(state, action, reward, next_state)
+        self.update_patterns(experience)
+        self.evaluate_performance()
+        
+        # Periodic knowledge consolidation
+        if len(self.experience_buffer) % 100 == 0:
+            self.consolidate_knowledge()
+    
+    def update_q_values(self, state, action, reward, next_state):
+        """Q-learning update rule"""
+        state_key = self.state_to_key(state)
+        
+        if state_key not in self.knowledge_base:
+            self.knowledge_base[state_key] = {}
+        
+        current_q = self.knowledge_base[state_key].get(action, 0)
+        max_next_q = max(
+            self.knowledge_base.get(
+                self.state_to_key(next_state), {}
+            ).values(), 
+            default=0
+        )
+        
+        # Q-learning formula
+        new_q = current_q + self.learning_rate * (
+            reward + 0.9 * max_next_q - current_q
+        )
+        
+        self.knowledge_base[state_key][action] = new_q
+    
+    def update_patterns(self, experience):
+        """Learn patterns from experience"""
+        # Pattern recognition and rule extraction
+        patterns = self.extract_patterns(experience)
+        for pattern in patterns:
+            self.add_to_knowledge_base(pattern)
+    
+    def consolidate_knowledge(self):
+        """Consolidate and optimize learned knowledge"""
+        # Remove outdated experiences
+        cutoff_time = time.time() - 3600  # 1 hour
+        self.experience_buffer = [
+            exp for exp in self.experience_buffer 
+            if exp['timestamp'] > cutoff_time
+        ]
+        
+        # Optimize knowledge representation
+        self.optimize_knowledge_base()
+    
+    def adapt_learning_rate(self):
+        """Dynamically adjust learning parameters"""
+        recent_performance = self.performance_history[-10:]
+        if len(recent_performance) >= 10:
+            if self.is_improving(recent_performance):
+                self.exploration_rate *= 0.95  # Reduce exploration
+            else:
+                self.exploration_rate *= 1.05  # Increase exploration
+                
+        # Decay learning rate over time
+        self.learning_rate *= 0.999
+
+# Example: Adaptive web scraping agent
+class AdaptiveScrapingAgent(LearningAgent):
+    def __init__(self):
+        super().__init__()
+        self.success_patterns = {}
+        self.failure_patterns = {}
+    
+    def scrape_page(self, url):
+        state = self.analyze_page_structure(url)
+        action = self.act(state)
+        
+        try:
+            result = self.execute_scraping_action(action, url)
+            reward = self.calculate_reward(result)
+            self.learn_from_experience(state, action, reward, None)
+            return result
+        except Exception as e:
+            self.learn_from_experience(state, action, -1, None)
+            return None</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="learning-types">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Types of Learning in AI Agents</h3>
+            <div class="types-grid">
+                <div class="type-card supervised-card">
+                    <div class="type-header">
+                        <div class="type-icon supervised-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div class="type-title">Supervised Learning</div>
+                    </div>
+                    <div class="type-desc">
+                        Learning from labeled examples and expert demonstrations to improve decision-making accuracy.
+                    </div>
+                    <ul class="type-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Code review feedback learning
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            User preference modeling
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Error pattern recognition
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="type-card unsupervised-card">
+                    <div class="type-header">
+                        <div class="type-icon unsupervised-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="type-title">Unsupervised Learning</div>
+                    </div>
+                    <div class="type-desc">
+                        Discovering hidden patterns and structures in data without explicit labels or guidance.
+                    </div>
+                    <ul class="type-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Usage pattern discovery
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Anomaly detection
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Feature extraction
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="type-card reinforcement-card">
+                    <div class="type-header">
+                        <div class="type-icon reinforcement-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="type-title">Reinforcement Learning</div>
+                    </div>
+                    <div class="type-desc">
+                        Learning optimal actions through trial and error, guided by reward signals from the environment.
+                    </div>
+                    <ul class="type-examples">
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Resource optimization
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Strategy adaptation
+                        </li>
+                        <li class="example-item">
+                            <div class="example-bullet"></div>
+                            Performance tuning
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="challenges-section">
+            <h3 class="text-xl font-bold mb-2">Implementation Challenges and Solutions</h3>
+            <div class="challenges-grid">
+                <div class="challenge-item">
+                    <div class="challenge-title">
+                        <i class="fas fa-exclamation-triangle challenge-icon"></i>
+                        Catastrophic Forgetting
+                    </div>
+                    <div class="challenge-desc">
+                        Agent forgets previously learned knowledge when learning new tasks or adapting to changes.
+                    </div>
+                    <div class="solution-desc">
+                        Solution: Implement experience replay, elastic weight consolidation, and progressive neural networks.
+                    </div>
+                </div>
+                <div class="challenge-item">
+                    <div class="challenge-title">
+                        <i class="fas fa-balance-scale challenge-icon"></i>
+                        Exploration vs Exploitation
+                    </div>
+                    <div class="challenge-desc">
+                        Balancing between trying new actions (exploration) and using known good actions (exploitation).
+                    </div>
+                    <div class="solution-desc">
+                        Solution: Use epsilon-greedy, UCB, or Thompson sampling strategies with adaptive parameters.
+                    </div>
+                </div>
+                <div class="challenge-item">
+                    <div class="challenge-title">
+                        <i class="fas fa-clock challenge-icon"></i>
+                        Sample Efficiency
+                    </div>
+                    <div class="challenge-desc">
+                        Learning requires many examples and interactions, which can be expensive or time-consuming.
+                    </div>
+                    <div class="solution-desc">
+                        Solution: Use transfer learning, meta-learning, and few-shot learning techniques.
+                    </div>
+                </div>
+                <div class="challenge-item">
+                    <div class="challenge-title">
+                        <i class="fas fa-shield-alt challenge-icon"></i>
+                        Safety and Robustness
+                    </div>
+                    <div class="challenge-desc">
+                        Ensuring agent doesn't learn harmful behaviors or make dangerous decisions during exploration.
+                    </div>
+                    <div class="solution-desc">
+                        Solution: Implement safe exploration, constrained optimization, and human oversight mechanisms.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

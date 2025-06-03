@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #059669;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .enterprise-overview {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .overview-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .overview-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .overview-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .applications-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .applications-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .application-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid #059669;
+            transition: transform 0.2s ease;
+        }
+        .application-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.1);
+        }
+        .app-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .app-icon {
+            width: 32px;
+            height: 32px;
+            background: #059669;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+        .app-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .app-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .app-benefits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .benefit-tag {
+            background: #dcfce7;
+            color: #166534;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        .roi-section {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .roi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .roi-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .roi-metric {
+            font-size: 24px;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 4px;
+        }
+        .roi-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .roi-desc {
+            font-size: 11px;
+            opacity: 0.8;
+            line-height: 1.3;
+        }
+        .implementation-example {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .code-content {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .code-header i {
+            color: #059669;
+        }
+        .code-body {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 10px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .case-studies {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .case-study-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .case-study-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid #059669;
+        }
+        .case-company {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .case-industry {
+            color: #059669;
+            font-size: 11px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .case-desc {
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .case-result {
+            color: #166534;
+            font-size: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">Enterprise Applications</h1>
+            <p class="text-lg text-gray-600">AI Agents Transforming Business Operations and Customer Experience</p>
+        </div>
+        
+        <div class="enterprise-overview">
+            <div class="overview-icon">
+                <i class="fas fa-building"></i>
+            </div>
+            <div class="overview-content">
+                <h3>Enterprise-Scale AI Agent Deployment</h3>
+                <p>
+                    AI agents are revolutionizing enterprise operations across industries, from customer service 
+                    automation to complex business process optimization, delivering measurable ROI and competitive advantages.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="applications-section">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Core Enterprise Applications</h3>
+                <div class="applications-grid">
+                    <div class="application-card">
+                        <div class="app-header">
+                            <div class="app-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <div class="app-title">Customer Service Automation</div>
+                        </div>
+                        <div class="app-desc">
+                            Intelligent customer support agents handling inquiries, troubleshooting, and escalations 
+                            with human-like understanding and 24/7 availability.
+                        </div>
+                        <div class="app-benefits">
+                            <span class="benefit-tag">90% Query Resolution</span>
+                            <span class="benefit-tag">24/7 Availability</span>
+                            <span class="benefit-tag">Multi-language</span>
+                        </div>
+                    </div>
+                    
+                    <div class="application-card">
+                        <div class="app-header">
+                            <div class="app-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="app-title">Business Process Automation</div>
+                        </div>
+                        <div class="app-desc">
+                            End-to-end workflow automation for complex business processes including approvals, 
+                            data processing, and cross-system integration.
+                        </div>
+                        <div class="app-benefits">
+                            <span class="benefit-tag">80% Time Savings</span>
+                            <span class="benefit-tag">Error Reduction</span>
+                            <span class="benefit-tag">Compliance</span>
+                        </div>
+                    </div>
+                    
+                    <div class="application-card">
+                        <div class="app-header">
+                            <div class="app-icon">
+                                <i class="fas fa-database"></i>
+                            </div>
+                            <div class="app-title">Data Analysis & Insights</div>
+                        </div>
+                        <div class="app-desc">
+                            Intelligent data agents that analyze complex datasets, generate insights, 
+                            and provide actionable business recommendations.
+                        </div>
+                        <div class="app-benefits">
+                            <span class="benefit-tag">Real-time Analysis</span>
+                            <span class="benefit-tag">Predictive Insights</span>
+                            <span class="benefit-tag">Automated Reports</span>
+                        </div>
+                    </div>
+                    
+                    <div class="application-card">
+                        <div class="app-header">
+                            <div class="app-icon">
+                                <i class="fas fa-users-cog"></i>
+                            </div>
+                            <div class="app-title">HR & Talent Management</div>
+                        </div>
+                        <div class="app-desc">
+                            AI-powered recruitment, employee onboarding, performance management, 
+                            and talent development with personalized experiences.
+                        </div>
+                        <div class="app-benefits">
+                            <span class="benefit-tag">Faster Hiring</span>
+                            <span class="benefit-tag">Better Matching</span>
+                            <span class="benefit-tag">Employee Satisfaction</span>
+                        </div>
+                    </div>
+                    
+                    <div class="application-card">
+                        <div class="app-header">
+                            <div class="app-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="app-title">Security & Compliance</div>
+                        </div>
+                        <div class="app-desc">
+                            Intelligent security monitoring, threat detection, compliance checking, 
+                            and automated incident response systems.
+                        </div>
+                        <div class="app-benefits">
+                            <span class="benefit-tag">Threat Detection</span>
+                            <span class="benefit-tag">Auto Response</span>
+                            <span class="benefit-tag">Compliance Monitoring</span>
+                        </div>
+                    </div>
+                    
+                    <div class="application-card">
+                        <div class="app-header">
+                            <div class="app-icon">
+                                <i class="fas fa-handshake"></i>
+                            </div>
+                            <div class="app-title">Sales & CRM Automation</div>
+                        </div>
+                        <div class="app-desc">
+                            Intelligent sales agents for lead qualification, customer engagement, 
+                            pipeline management, and personalized sales strategies.
+                        </div>
+                        <div class="app-benefits">
+                            <span class="benefit-tag">Lead Scoring</span>
+                            <span class="benefit-tag">Personalization</span>
+                            <span class="benefit-tag">Revenue Growth</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="roi-section">
+                <h3 class="text-lg font-bold mb-4">Enterprise ROI Metrics</h3>
+                <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 16px; margin-bottom: 16px; font-size: 12px;">
+                    <strong>Industry Benchmarks:</strong> Enterprise AI agent implementations typically show positive ROI 
+                    within 6-12 months, with significant improvements in efficiency, cost reduction, and customer satisfaction.
+                </div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-metric">300%</div>
+                        <div class="roi-label">Average ROI</div>
+                        <div class="roi-desc">
+                            Return on investment within first year of AI agent deployment across enterprise functions
+                        </div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-metric">60%</div>
+                        <div class="roi-label">Cost Reduction</div>
+                        <div class="roi-desc">
+                            Average reduction in operational costs through process automation and efficiency gains
+                        </div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-metric">85%</div>
+                        <div class="roi-label">Customer Satisfaction</div>
+                        <div class="roi-desc">
+                            Improvement in customer satisfaction scores through faster, more accurate service delivery
+                        </div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-metric">40%</div>
+                        <div class="roi-label">Productivity Gain</div>
+                        <div class="roi-desc">
+                            Increase in employee productivity by automating routine tasks and providing intelligent assistance
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="implementation-example">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Enterprise Customer Service Agent Implementation</h3>
+            
+            <div class="code-content">
+                <div class="code-header">
+                    <div>
+                        <i class="fas fa-code"></i>
+                        Enterprise-Grade Customer Service Agent
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.7;">Python + FastAPI + Enterprise Integrations</div>
+                </div>
+                <div class="code-body">
+<pre><code class="language-python">from fastapi import FastAPI, HTTPException, Depends
+from langchain.agents import Agent, Tool
+from langchain.llms import OpenAI
+from langchain.memory import ConversationBufferMemory
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+import redis
+import logging
+from typing import List, Dict, Any, Optional
+from datetime import datetime
+import json
+
+# Enterprise Customer Service Agent System
+class EnterpriseCustomerServiceAgent:
+    """Enterprise-grade customer service agent with full business integration"""
+    
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.setup_database()
+        self.setup_cache()
+        self.setup_logging()
+        self.setup_integrations()
+        self.setup_agents()
+        
+    def setup_database(self):
+        """Setup enterprise database connections"""
+        self.engine = create_engine(self.config['database_url'])
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        
+        # Customer interaction tracking
+        Base = declarative_base()
+        
+        class CustomerInteraction(Base):
+            __tablename__ = "customer_interactions"
+            
+            id = Column(Integer, primary_key=True, index=True)
+            customer_id = Column(String, index=True)
+            session_id = Column(String, index=True)
+            agent_type = Column(String)
+            query = Column(Text)
+            response = Column(Text)
+            satisfaction_score = Column(Integer)
+            resolution_status = Column(String)
+            created_at = Column(DateTime, default=datetime.utcnow)
+            
+        self.CustomerInteraction = CustomerInteraction
+        Base.metadata.create_all(bind=self.engine)
+    
+    def setup_cache(self):
+        """Setup Redis cache for session management"""
+        self.redis_client = redis.Redis(
+            host=self.config['redis_host'],
+            port=self.config['redis_port'],
+            decode_responses=True
+        )
+    
+    def setup_logging(self):
+        """Setup enterprise logging"""
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler('customer_service_agent.log'),
+                logging.StreamHandler()
+            ]
+        )
+        self.logger = logging.getLogger(__name__)
+    
+    def setup_integrations(self):
+        """Setup enterprise system integrations"""
+        
+        # CRM Integration
+        self.crm_tools = [
+            Tool(
+                name="get_customer_profile",
+                description="Retrieve customer profile and history from CRM",
+                func=self.get_customer_profile
+            ),
+            Tool(
+                name="update_customer_record",
+                description="Update customer information in CRM system",
+                func=self.update_customer_record
+            ),
+            Tool(
+                name="create_support_ticket",
+                description="Create support ticket in ticketing system",
+                func=self.create_support_ticket
+            )
+        ]
+        
+        # Knowledge Base Integration
+        self.kb_tools = [
+            Tool(
+                name="search_knowledge_base",
+                description="Search company knowledge base for solutions",
+                func=self.search_knowledge_base
+            ),
+            Tool(
+                name="get_product_info",
+                description="Retrieve detailed product information",
+                func=self.get_product_info
+            ),
+            Tool(
+                name="check_service_status",
+                description="Check current service status and outages",
+                func=self.check_service_status
+            )
+        ]
+        
+        # Business Process Integration
+        self.process_tools = [
+            Tool(
+                name="initiate_refund_process",
+                description="Start refund process for eligible customers",
+                func=self.initiate_refund_process
+            ),
+            Tool(
+                name="schedule_callback",
+                description="Schedule callback with human agent",
+                func=self.schedule_callback
+            ),
+            Tool(
+                name="escalate_to_supervisor",
+                description="Escalate complex issues to supervisor",
+                func=self.escalate_to_supervisor
+            )
+        ]
+    
+    def setup_agents(self):
+        """Setup specialized customer service agents"""
+        
+        llm = OpenAI(api_key=self.config['openai_api_key'], temperature=0.1)
+        
+        # Tier 1 Support Agent
+        self.tier1_agent = Agent(
+            llm=llm,
+            tools=self.crm_tools + self.kb_tools,
+            memory=ConversationBufferMemory(),
+            system_message="""You are a Tier 1 customer service agent. Handle common inquiries, 
+            provide product information, and resolve basic issues. Always be helpful, professional, 
+            and empathetic. Escalate complex issues to appropriate specialists."""
+        )
+        
+        # Technical Support Agent
+        self.tech_agent = Agent(
+            llm=llm,
+            tools=self.kb_tools + self.process_tools,
+            memory=ConversationBufferMemory(),
+            system_message="""You are a technical support specialist. Provide detailed technical 
+            assistance, troubleshooting guidance, and solution recommendations. Use the knowledge 
+            base effectively and create tickets for unresolved issues."""
+        )
+        
+        # Billing Support Agent
+        self.billing_agent = Agent(
+            llm=llm,
+            tools=self.crm_tools + self.process_tools,
+            memory=ConversationBufferMemory(),
+            system_message="""You are a billing support specialist. Handle billing inquiries, 
+            payment issues, refund requests, and account management. Ensure compliance with 
+            company policies and financial regulations."""
+        )
+    
+    def get_customer_profile(self, customer_id: str) -> str:
+        """Retrieve customer profile from CRM"""
+        try:
+            # Simulate CRM API call
+            profile = {
+                "customer_id": customer_id,
+                "name": "John Doe",
+                "tier": "Premium",
+                "account_status": "Active",
+                "last_interaction": "2024-01-15",
+                "total_value": "$15,000",
+                "support_history": [
+                    {"date": "2024-01-10", "issue": "Login problem", "status": "Resolved"},
+                    {"date": "2024-01-05", "issue": "Billing inquiry", "status": "Resolved"}
+                ]
+            }
+            
+            self.logger.info(f"Retrieved customer profile for {customer_id}")
+            return json.dumps(profile)
+            
+        except Exception as e:
+            self.logger.error(f"Error retrieving customer profile: {e}")
+            return "Unable to retrieve customer profile"
+    
+    def search_knowledge_base(self, query: str) -> str:
+        """Search knowledge base for solutions"""
+        try:
+            # Simulate knowledge base search
+            results = [
+                {
+                    "title": "How to reset password",
+                    "content": "To reset your password, go to login page and click 'Forgot Password'",
+                    "relevance": 0.95
+                },
+                {
+                    "title": "Billing cycle information",
+                    "content": "Billing cycles run from the 1st to the last day of each month",
+                    "relevance": 0.87
+                }
+            ]
+            
+            self.logger.info(f"Knowledge base search for: {query}")
+            return json.dumps(results)
+            
+        except Exception as e:
+            self.logger.error(f"Error searching knowledge base: {e}")
+            return "Unable to search knowledge base"
+    
+    def create_support_ticket(self, issue_description: str, customer_id: str, priority: str = "Medium") -> str:
+        """Create support ticket in ticketing system"""
+        try:
+            ticket_id = f"TKT-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            
+            ticket = {
+                "ticket_id": ticket_id,
+                "customer_id": customer_id,
+                "description": issue_description,
+                "priority": priority,
+                "status": "Open",
+                "created_at": datetime.now().isoformat()
+            }
+            
+            self.logger.info(f"Created support ticket {ticket_id} for customer {customer_id}")
+            return f"Support ticket {ticket_id} created successfully"
+            
+        except Exception as e:
+            self.logger.error(f"Error creating support ticket: {e}")
+            return "Unable to create support ticket"
+    
+    def handle_customer_inquiry(self, customer_id: str, query: str, session_id: str) -> Dict[str, Any]:
+        """Handle customer inquiry with appropriate agent"""
+        
+        try:
+            # Determine appropriate agent based on query classification
+            agent_type = self.classify_inquiry(query)
+            
+            # Select appropriate agent
+            if agent_type == "technical":
+                agent = self.tech_agent
+            elif agent_type == "billing":
+                agent = self.billing_agent
+            else:
+                agent = self.tier1_agent
+            
+            # Get customer context
+            customer_profile = self.get_customer_profile(customer_id)
+            
+            # Prepare context-aware prompt
+            context_prompt = f"""
+            Customer Profile: {customer_profile}
+            Customer Query: {query}
+            
+            Please provide a helpful, professional response addressing the customer's needs.
+            """
+            
+            # Generate response
+            response = agent.run(context_prompt)
+            
+            # Store interaction in database
+            self.store_interaction(customer_id, session_id, agent_type, query, response)
+            
+            # Cache session data
+            self.update_session_cache(session_id, {
+                "customer_id": customer_id,
+                "last_agent": agent_type,
+                "last_query": query,
+                "timestamp": datetime.now().isoformat()
+            })
+            
+            return {
+                "response": response,
+                "agent_type": agent_type,
+                "session_id": session_id,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error handling customer inquiry: {e}")
+            return {
+                "response": "I apologize, but I'm experiencing technical difficulties. Please try again or contact our support team directly.",
+                "agent_type": "error",
+                "session_id": session_id,
+                "error": str(e)
+            }
+    
+    def classify_inquiry(self, query: str) -> str:
+        """Classify customer inquiry to route to appropriate agent"""
+        
+        query_lower = query.lower()
+        
+        # Technical keywords
+        technical_keywords = ['error', 'bug', 'not working', 'technical', 'login', 'password', 'setup']
+        
+        # Billing keywords
+        billing_keywords = ['bill', 'payment', 'charge', 'refund', 'invoice', 'subscription', 'pricing']
+        
+        if any(keyword in query_lower for keyword in technical_keywords):
+            return "technical"
+        elif any(keyword in query_lower for keyword in billing_keywords):
+            return "billing"
+        else:
+            return "general"
+    
+    def store_interaction(self, customer_id: str, session_id: str, agent_type: str, query: str, response: str):
+        """Store customer interaction in database"""
+        
+        db = self.SessionLocal()
+        try:
+            interaction = self.CustomerInteraction(
+                customer_id=customer_id,
+                session_id=session_id,
+                agent_type=agent_type,
+                query=query,
+                response=response,
+                resolution_status="In Progress"
+            )
+            db.add(interaction)
+            db.commit()
+            
+        except Exception as e:
+            self.logger.error(f"Error storing interaction: {e}")
+            db.rollback()
+        finally:
+            db.close()
+    
+    def update_session_cache(self, session_id: str, data: Dict[str, Any]):
+        """Update session data in Redis cache"""
+        try:
+            self.redis_client.setex(
+                f"session:{session_id}",
+                3600,  # 1 hour expiry
+                json.dumps(data)
+            )
+        except Exception as e:
+            self.logger.error(f"Error updating session cache: {e}")
+    
+    def get_analytics_dashboard(self) -> Dict[str, Any]:
+        """Generate analytics dashboard for management"""
+        
+        db = self.SessionLocal()
+        try:
+            # Query interaction statistics
+            total_interactions = db.query(self.CustomerInteraction).count()
+            
+            # Agent performance metrics
+            agent_stats = db.query(
+                self.CustomerInteraction.agent_type,
+                db.func.count(self.CustomerInteraction.id).label('count'),
+                db.func.avg(self.CustomerInteraction.satisfaction_score).label('avg_satisfaction')
+            ).group_by(self.CustomerInteraction.agent_type).all()
+            
+            return {
+                "total_interactions": total_interactions,
+                "agent_performance": [
+                    {
+                        "agent_type": stat.agent_type,
+                        "interaction_count": stat.count,
+                        "avg_satisfaction": round(stat.avg_satisfaction or 0, 2)
+                    }
+                    for stat in agent_stats
+                ],
+                "generated_at": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error generating analytics: {e}")
+            return {"error": "Unable to generate analytics"}
+        finally:
+            db.close()
+
+# FastAPI Application
+app = FastAPI(title="Enterprise Customer Service Agent API")
+
+# Initialize agent system
+config = {
+    "database_url": "postgresql://user:password@localhost/customer_service",
+    "redis_host": "localhost",
+    "redis_port": 6379,
+    "openai_api_key": "your-openai-api-key"
+}
+
+cs_agent = EnterpriseCustomerServiceAgent(config)
+
+@app.post("/api/customer-inquiry")
+async def handle_inquiry(customer_id: str, query: str, session_id: str):
+    """Handle customer inquiry endpoint"""
+    result = cs_agent.handle_customer_inquiry(customer_id, query, session_id)
+    return result
+
+@app.get("/api/analytics")
+async def get_analytics():
+    """Get analytics dashboard"""
+    return cs_agent.get_analytics_dashboard()
+
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="case-studies">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Enterprise Success Stories</h3>
+            <div class="case-study-grid">
+                <div class="case-study-card">
+                    <div class="case-company">Global Bank</div>
+                    <div class="case-industry">Financial Services</div>
+                    <div class="case-desc">
+                        Deployed AI agents for customer service, fraud detection, and loan processing. 
+                        Handles 2M+ customer interactions monthly.
+                    </div>
+                    <div class="case-result">
+                        Result: 65% cost reduction, 90% customer satisfaction
+                    </div>
+                </div>
+                <div class="case-study-card">
+                    <div class="case-company">Tech Corporation</div>
+                    <div class="case-industry">Technology</div>
+                    <div class="case-desc">
+                        Implemented AI agents for IT support, HR processes, and software development assistance. 
+                        Serves 50,000+ employees globally.
+                    </div>
+                    <div class="case-result">
+                        Result: 45% productivity increase, 80% faster resolution
+                    </div>
+                </div>
+                <div class="case-study-card">
+                    <div class="case-company">Retail Chain</div>
+                    <div class="case-industry">Retail</div>
+                    <div class="case-desc">
+                        AI agents for inventory management, customer support, and personalized shopping experiences 
+                        across 1,000+ stores.
+                    </div>
+                    <div class="case-result">
+                        Result: 30% revenue increase, 95% inventory accuracy
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .complexity-spectrum {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .spectrum-bar {
+            height: 60px;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981, #06b6d4, #3b82f6);
+            border-radius: 30px;
+            position: relative;
+            margin: 20px 0;
+        }
+        .spectrum-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .agent-types-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+        .agent-type-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+            transition: transform 0.2s ease;
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+        .agent-type-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .reflex-card { border-top-color: #ef4444; }
+        .model-card { border-top-color: #f59e0b; }
+        .goal-card { border-top-color: #10b981; }
+        .utility-card { border-top-color: #06b6d4; }
+        .learning-card { border-top-color: #3b82f6; }
+        
+        .card-header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            color: white;
+            font-size: 16px;
+        }
+        .reflex-icon { background: #ef4444; }
+        .model-icon { background: #f59e0b; }
+        .goal-icon { background: #10b981; }
+        .utility-icon { background: #06b6d4; }
+        .learning-icon { background: #3b82f6; }
+        
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            text-align: center;
+        }
+        .card-description {
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.3;
+            margin-bottom: 12px;
+            flex: 1;
+        }
+        .characteristics-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .characteristic-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 10px;
+            color: #475569;
+        }
+        .char-bullet {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #06b6d4;
+            margin-right: 6px;
+            flex-shrink: 0;
+        }
+        .complexity-indicator {
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .complexity-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin: 0 2px;
+            background: #e2e8f0;
+        }
+        .complexity-dot.active {
+            background: #3b82f6;
+        }
+        .mapping-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .use-case-category {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 3px solid #3b82f6;
+        }
+        .category-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .use-case-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .use-case-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        .use-case-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        .simple-bullet { background: #ef4444; }
+        .moderate-bullet { background: #f59e0b; }
+        .complex-bullet { background: #3b82f6; }
+        .selection-guide {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .guide-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .guide-text {
+            flex: 1;
+        }
+        .guide-icon {
+            font-size: 48px;
+            margin-left: 20px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">The Five Types of AI Agents - Overview</h1>
+            <p class="text-lg text-gray-600">Classification Framework and Complexity Spectrum</p>
+        </div>
+        
+        <div class="complexity-spectrum">
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Complexity and Capability Spectrum</h3>
+            <div class="spectrum-bar"></div>
+            <div class="spectrum-labels">
+                <span>Simple Reactive</span>
+                <span>Model-Based</span>
+                <span>Goal-Oriented</span>
+                <span>Utility-Based</span>
+                <span>Learning Agents</span>
+            </div>
+        </div>
+        
+        <div class="agent-types-grid">
+            <div class="agent-type-card reflex-card">
+                <div class="card-header">
+                    <div class="card-icon reflex-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="card-title">Simple Reflex</div>
+                </div>
+                <div class="card-description">
+                    React directly to current percepts using condition-action rules. No memory or planning capabilities.
+                </div>
+                <ul class="characteristics-list">
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Immediate response
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Rule-based logic
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        No state memory
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Fast execution
+                    </li>
+                </ul>
+                <div class="complexity-indicator">
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot"></div>
+                    <div class="complexity-dot"></div>
+                    <div class="complexity-dot"></div>
+                    <div class="complexity-dot"></div>
+                </div>
+            </div>
+            
+            <div class="agent-type-card model-card">
+                <div class="card-header">
+                    <div class="card-icon model-icon">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <div class="card-title">Model-Based Reflex</div>
+                </div>
+                <div class="card-description">
+                    Maintain internal state and world model to handle partially observable environments.
+                </div>
+                <ul class="characteristics-list">
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Internal state tracking
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        World model
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        History awareness
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Better decisions
+                    </li>
+                </ul>
+                <div class="complexity-indicator">
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot"></div>
+                    <div class="complexity-dot"></div>
+                    <div class="complexity-dot"></div>
+                </div>
+            </div>
+            
+            <div class="agent-type-card goal-card">
+                <div class="card-header">
+                    <div class="card-icon goal-icon">
+                        <i class="fas fa-target"></i>
+                    </div>
+                    <div class="card-title">Goal-Based</div>
+                </div>
+                <div class="card-description">
+                    Plan sequences of actions to achieve specific goals using search and planning algorithms.
+                </div>
+                <ul class="characteristics-list">
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Goal representation
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Planning algorithms
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Action sequences
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Future reasoning
+                    </li>
+                </ul>
+                <div class="complexity-indicator">
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot"></div>
+                    <div class="complexity-dot"></div>
+                </div>
+            </div>
+            
+            <div class="agent-type-card utility-card">
+                <div class="card-header">
+                    <div class="card-icon utility-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="card-title">Utility-Based</div>
+                </div>
+                <div class="card-description">
+                    Optimize decisions based on utility functions that measure desirability of different outcomes.
+                </div>
+                <ul class="characteristics-list">
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Utility functions
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Trade-off analysis
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Optimization
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Quality metrics
+                    </li>
+                </ul>
+                <div class="complexity-indicator">
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot"></div>
+                </div>
+            </div>
+            
+            <div class="agent-type-card learning-card">
+                <div class="card-header">
+                    <div class="card-icon learning-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="card-title">Learning</div>
+                </div>
+                <div class="card-description">
+                    Improve performance over time through experience, feedback, and various learning mechanisms.
+                </div>
+                <ul class="characteristics-list">
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Experience learning
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Adaptation
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Performance improvement
+                    </li>
+                    <li class="characteristic-item">
+                        <div class="char-bullet"></div>
+                        Self-modification
+                    </li>
+                </ul>
+                <div class="complexity-indicator">
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                    <div class="complexity-dot active"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mapping-section">
+            <h3 class="text-lg font-bold text-gray-800 mb-2">Use Case Mapping by Complexity</h3>
+            <div class="mapping-grid">
+                <div class="use-case-category">
+                    <div class="category-title">Simple & Fast (Reflex/Model-Based)</div>
+                    <ul class="use-case-list">
+                        <li class="use-case-item">
+                            <div class="use-case-bullet simple-bullet"></div>
+                            Chatbots and FAQ systems
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet simple-bullet"></div>
+                            Alert and notification systems
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet simple-bullet"></div>
+                            Simple automation scripts
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet simple-bullet"></div>
+                            Basic monitoring agents
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="use-case-category">
+                    <div class="category-title">Moderate Complexity (Goal/Utility-Based)</div>
+                    <ul class="use-case-list">
+                        <li class="use-case-item">
+                            <div class="use-case-bullet moderate-bullet"></div>
+                            Task planning and scheduling
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet moderate-bullet"></div>
+                            Resource optimization
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet moderate-bullet"></div>
+                            Multi-step workflows
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet moderate-bullet"></div>
+                            Decision support systems
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="use-case-category">
+                    <div class="category-title">High Complexity (Learning Agents)</div>
+                    <ul class="use-case-list">
+                        <li class="use-case-item">
+                            <div class="use-case-bullet complex-bullet"></div>
+                            Adaptive user interfaces
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet complex-bullet"></div>
+                            Personalized recommendations
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet complex-bullet"></div>
+                            Autonomous system optimization
+                        </li>
+                        <li class="use-case-item">
+                            <div class="use-case-bullet complex-bullet"></div>
+                            Intelligent assistants
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="selection-guide">
+            <div class="guide-content">
+                <div class="guide-text">
+                    <h3 class="text-xl font-bold mb-2">Selection Principle</h3>
+                    <p class="text-sm opacity-90">
+                        Choose the simplest agent type that can effectively solve your problem. 
+                        Higher complexity brings more capabilities but also increased development time, 
+                        computational requirements, and potential failure modes.
+                    </p>
+                </div>
+                <div class="guide-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

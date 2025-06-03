@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        .slide-container {
+            width: 1280px;
+            min-height: 720px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .header {
+            color: #1e293b;
+            border-bottom: 3px solid #3b82f6;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .react-overview {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+        .react-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            opacity: 0.9;
+        }
+        .react-content h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .react-content p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        .react-cycle {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .cycle-diagram {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .cycle-step {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 8px 0;
+            border-left: 4px solid;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .cycle-step:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .reason-step { border-left-color: #3b82f6; }
+        .act-step { border-left-color: #10b981; }
+        .observe-step { border-left-color: #f59e0b; }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .reason-icon { background: #3b82f6; }
+        .act-icon { background: #10b981; }
+        .observe-icon { background: #f59e0b; }
+        
+        .step-title {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 16px;
+        }
+        .step-number {
+            background: #e2e8f0;
+            color: #64748b;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+        .step-desc {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        .step-details {
+            background: #f1f5f9;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 11px;
+            color: #475569;
+        }
+        .flow-arrow {
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 20px;
+            z-index: 10;
+        }
+        .implementation-details {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .benefit-card {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-top: 3px solid;
+        }
+        .transparency-card { border-top-color: #3b82f6; }
+        .reliability-card { border-top-color: #10b981; }
+        .debugging-card { border-top-color: #f59e0b; }
+        .flexibility-card { border-top-color: #ef4444; }
+        
+        .benefit-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .benefit-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            color: white;
+            font-size: 12px;
+        }
+        .transparency-icon { background: #3b82f6; }
+        .reliability-icon { background: #10b981; }
+        .debugging-icon { background: #f59e0b; }
+        .flexibility-icon { background: #ef4444; }
+        
+        .benefit-title {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .benefit-desc {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .code-implementation {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+        .code-tabs {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 16px;
+        }
+        .code-tab {
+            padding: 8px 16px;
+            background: #f8fafc;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            margin-right: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s ease;
+        }
+        .code-tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .code-content {
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .code-header {
+            background: #334155;
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .code-header i {
+            color: #3b82f6;
+        }
+        .code-body {
+            padding: 20px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #e2e8f0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .advanced-patterns {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .pattern-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .pattern-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #06b6d4;
+            display: flex;
+            align-items: center;
+        }
+        .pattern-icon {
+            margin-right: 8px;
+        }
+        .pattern-desc {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .pattern-example {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            padding: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 10px;
+            color: #e2e8f0;
+        }
+        .comparison-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 16px;
+        }
+        .approach-card {
+            border-radius: 8px;
+            padding: 16px;
+            border: 2px solid;
+        }
+        .react-approach { border-color: #3b82f6; background: #eff6ff; }
+        .traditional-approach { border-color: #64748b; background: #f8fafc; }
+        
+        .approach-title {
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .approach-icon {
+            margin-right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        .react-approach .approach-icon { background: #3b82f6; }
+        .traditional-approach .approach-icon { background: #64748b; }
+        
+        .approach-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #475569;
+        }
+        .feature-bullet {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .react-approach .feature-bullet { background: #3b82f6; }
+        .traditional-approach .feature-bullet { background: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <div class="header">
+            <h1 class="text-4xl font-bold mb-2">The ReAct Architecture Pattern</h1>
+            <p class="text-lg text-gray-600">Reasoning + Acting: A Paradigm for Intelligent Agent Behavior</p>
+        </div>
+        
+        <div class="react-overview">
+            <div class="react-icon">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+            <div class="react-content">
+                <h3>ReAct: Synergistic Reasoning and Acting</h3>
+                <p>
+                    ReAct combines reasoning traces and task-specific actions in an interleaved manner, 
+                    allowing for greater synergy between the two: reasoning helps the model track and update action plans, 
+                    while actions allow it to interface with external sources for additional information.
+                </p>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="react-cycle">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">ReAct Execution Cycle</h3>
+                
+                <div class="cycle-diagram">
+                    <div class="cycle-step reason-step">
+                        <div class="step-header">
+                            <div class="step-icon reason-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="step-title">Reason</div>
+                            <div class="step-number">1</div>
+                        </div>
+                        <div class="step-desc">
+                            Analyze the current situation, understand the goal, and plan the next action based on available information.
+                        </div>
+                        <div class="step-details">
+                            <strong>Thought Process:</strong> "I need to search for information about X. Let me use the search tool to find relevant data."
+                        </div>
+                        <div class="flow-arrow">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="cycle-step act-step">
+                        <div class="step-header">
+                            <div class="step-icon act-icon">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="step-title">Act</div>
+                            <div class="step-number">2</div>
+                        </div>
+                        <div class="step-desc">
+                            Execute the planned action using available tools, APIs, or other external resources.
+                        </div>
+                        <div class="step-details">
+                            <strong>Action:</strong> search("query about X") → Execute search tool with specific parameters
+                        </div>
+                        <div class="flow-arrow">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="cycle-step observe-step">
+                        <div class="step-header">
+                            <div class="step-icon observe-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="step-title">Observe</div>
+                            <div class="step-number">3</div>
+                        </div>
+                        <div class="step-desc">
+                            Process the results of the action, update understanding, and determine if the goal is achieved or if more steps are needed.
+                        </div>
+                        <div class="step-details">
+                            <strong>Observation:</strong> "The search returned Y results. I now have the information needed to answer the question."
+                        </div>
+                        <div style="position: absolute; right: -15px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 20px;">
+                            <i class="fas fa-arrow-up" style="transform: rotate(180deg);"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="implementation-details">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">Key Benefits</h3>
+                
+                <div class="benefits-grid">
+                    <div class="benefit-card transparency-card">
+                        <div class="benefit-header">
+                            <div class="benefit-icon transparency-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="benefit-title">Transparency</div>
+                        </div>
+                        <div class="benefit-desc">
+                            Explicit reasoning traces make the agent's decision-making process interpretable and auditable.
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-card reliability-card">
+                        <div class="benefit-header">
+                            <div class="benefit-icon reliability-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="benefit-title">Reliability</div>
+                        </div>
+                        <div class="benefit-desc">
+                            Structured approach reduces hallucinations and improves factual accuracy through external verification.
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-card debugging-card">
+                        <div class="benefit-header">
+                            <div class="benefit-icon debugging-icon">
+                                <i class="fas fa-bug"></i>
+                            </div>
+                            <div class="benefit-title">Debuggability</div>
+                        </div>
+                        <div class="benefit-desc">
+                            Clear separation of reasoning and action makes it easier to identify and fix issues in agent behavior.
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-card flexibility-card">
+                        <div class="benefit-header">
+                            <div class="benefit-icon flexibility-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="benefit-title">Flexibility</div>
+                        </div>
+                        <div class="benefit-desc">
+                            Adaptable to various domains and tasks by changing the available tools and reasoning prompts.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="code-implementation">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Implementation Example</h3>
+            
+            <div class="code-content">
+                <div class="code-header">
+                    <div>
+                        <i class="fas fa-code"></i>
+                        ReAct Agent Implementation
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.7;">Python + LangChain</div>
+                </div>
+                <div class="code-body">
+<pre><code class="language-python">from typing import List, Dict, Any, Optional, Tuple
+import re
+from dataclasses import dataclass
+from abc import ABC, abstractmethod
+
+@dataclass
+class ReActStep:
+    """Represents a single step in the ReAct cycle"""
+    step_type: str  # 'thought', 'action', 'observation'
+    content: str
+    metadata: Dict[str, Any] = None
+
+@dataclass
+class ReActTrace:
+    """Complete trace of ReAct execution"""
+    steps: List[ReActStep]
+    final_answer: Optional[str] = None
+    success: bool = False
+
+class Tool(ABC):
+    """Abstract base class for ReAct tools"""
+    
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+    
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        pass
+    
+    @abstractmethod
+    async def execute(self, input_str: str) -> str:
+        pass
+
+class SearchTool(Tool):
+    """Example search tool implementation"""
+    
+    @property
+    def name(self) -> str:
+        return "search"
+    
+    @property
+    def description(self) -> str:
+        return "Search for information on the internet. Input should be a search query."
+    
+    async def execute(self, input_str: str) -> str:
+        # Simulate search API call
+        return f"Search results for '{input_str}': [Relevant information found...]"
+
+class CalculatorTool(Tool):
+    """Example calculator tool implementation"""
+    
+    @property
+    def name(self) -> str:
+        return "calculator"
+    
+    @property
+    def description(self) -> str:
+        return "Perform mathematical calculations. Input should be a mathematical expression."
+    
+    async def execute(self, input_str: str) -> str:
+        try:
+            # Safe evaluation of mathematical expressions
+            result = eval(input_str.replace("^", "**"))
+            return f"Result: {result}"
+        except Exception as e:
+            return f"Error: {str(e)}"
+
+class ReActAgent:
+    """ReAct pattern implementation for intelligent agents"""
+    
+    def __init__(self, 
+                 llm_client,
+                 tools: List[Tool],
+                 max_iterations: int = 10,
+                 verbose: bool = True):
+        self.llm = llm_client
+        self.tools = {tool.name: tool for tool in tools}
+        self.max_iterations = max_iterations
+        self.verbose = verbose
+        
+        # ReAct prompt template
+        self.react_prompt = self._build_react_prompt()
+    
+    def _build_react_prompt(self) -> str:
+        """Build the ReAct prompt template"""
+        tool_descriptions = "\n".join([
+            f"- {tool.name}: {tool.description}"
+            for tool in self.tools.values()
+        ])
+        
+        return f"""You are an intelligent agent that can reason and act to solve problems.
+
+Available tools:
+{tool_descriptions}
+
+Use the following format:
+
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [{', '.join(self.tools.keys())}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
+
+Begin!
+
+Question: {{question}}"""
+    
+    async def run(self, question: str) -> ReActTrace:
+        """Execute ReAct cycle to answer a question"""
+        trace = ReActTrace(steps=[])
+        
+        # Initialize the prompt with the question
+        prompt = self.react_prompt.format(question=question)
+        current_context = prompt
+        
+        for iteration in range(self.max_iterations):
+            if self.verbose:
+                print(f"\n--- Iteration {iteration + 1} ---")
+            
+            # Generate reasoning and action
+            response = await self.llm.generate(current_context)
+            
+            # Parse the response
+            thought, action, action_input, final_answer = self._parse_response(response)
+            
+            if thought:
+                step = ReActStep("thought", thought)
+                trace.steps.append(step)
+                current_context += f"\nThought: {thought}"
+                
+                if self.verbose:
+                    print(f"Thought: {thought}")
+            
+            if final_answer:
+                trace.final_answer = final_answer
+                trace.success = True
+                if self.verbose:
+                    print(f"Final Answer: {final_answer}")
+                break
+            
+            if action and action_input:
+                # Record the action
+                step = ReActStep("action", f"{action}: {action_input}")
+                trace.steps.append(step)
+                current_context += f"\nAction: {action}\nAction Input: {action_input}"
+                
+                if self.verbose:
+                    print(f"Action: {action}")
+                    print(f"Action Input: {action_input}")
+                
+                # Execute the action
+                if action in self.tools:
+                    try:
+                        observation = await self.tools[action].execute(action_input)
+                    except Exception as e:
+                        observation = f"Error executing {action}: {str(e)}"
+                else:
+                    observation = f"Error: Unknown action '{action}'"
+                
+                # Record the observation
+                step = ReActStep("observation", observation)
+                trace.steps.append(step)
+                current_context += f"\nObservation: {observation}"
+                
+                if self.verbose:
+                    print(f"Observation: {observation}")
+            else:
+                # If no valid action is found, break to avoid infinite loop
+                if self.verbose:
+                    print("No valid action found, ending execution")
+                break
+        
+        if not trace.success:
+            trace.final_answer = "Unable to determine the answer within the iteration limit"
+        
+        return trace
+    
+    def _parse_response(self, response: str) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
+        """Parse LLM response to extract thought, action, action input, and final answer"""
+        thought = None
+        action = None
+        action_input = None
+        final_answer = None
+        
+        # Extract thought
+        thought_match = re.search(r"Thought:\s*(.*?)(?=\n(?:Action|Final Answer)|\Z)", response, re.DOTALL)
+        if thought_match:
+            thought = thought_match.group(1).strip()
+        
+        # Extract final answer
+        final_answer_match = re.search(r"Final Answer:\s*(.*)", response, re.DOTALL)
+        if final_answer_match:
+            final_answer = final_answer_match.group(1).strip()
+            return thought, action, action_input, final_answer
+        
+        # Extract action
+        action_match = re.search(r"Action:\s*(.*?)(?=\n|\Z)", response)
+        if action_match:
+            action = action_match.group(1).strip()
+        
+        # Extract action input
+        action_input_match = re.search(r"Action Input:\s*(.*?)(?=\n|\Z)", response)
+        if action_input_match:
+            action_input = action_input_match.group(1).strip()
+        
+        return thought, action, action_input, final_answer
+    
+    def get_trace_summary(self, trace: ReActTrace) -> Dict[str, Any]:
+        """Generate a summary of the ReAct trace"""
+        return {
+            "total_steps": len(trace.steps),
+            "thoughts": len([s for s in trace.steps if s.step_type == "thought"]),
+            "actions": len([s for s in trace.steps if s.step_type == "action"]),
+            "observations": len([s for s in trace.steps if s.step_type == "observation"]),
+            "success": trace.success,
+            "final_answer": trace.final_answer
+        }
+
+# Advanced ReAct implementation with memory and planning
+class AdvancedReActAgent(ReActAgent):
+    """Enhanced ReAct agent with memory and planning capabilities"""
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.memory = []  # Store previous interactions
+        self.planning_enabled = True
+    
+    async def run_with_planning(self, question: str) -> ReActTrace:
+        """Execute ReAct with initial planning phase"""
+        if self.planning_enabled:
+            # Generate initial plan
+            plan_prompt = f"""Given the question: "{question}"
+            
+Create a high-level plan to solve this problem. Consider:
+1. What information do you need?
+2. What tools might be useful?
+3. What are the key steps?
+
+Plan:"""
+            
+            plan_response = await self.llm.generate(plan_prompt)
+            
+            if self.verbose:
+                print(f"Initial Plan: {plan_response}")
+            
+            # Store plan in memory
+            self.memory.append({
+                "type": "plan",
+                "question": question,
+                "plan": plan_response
+            })
+        
+        # Execute normal ReAct cycle
+        trace = await self.run(question)
+        
+        # Store trace in memory
+        self.memory.append({
+            "type": "execution",
+            "question": question,
+            "trace": trace
+        })
+        
+        return trace
+    
+    def get_memory_context(self) -> str:
+        """Get relevant context from memory"""
+        if not self.memory:
+            return ""
+        
+        context = "Previous interactions:\n"
+        for item in self.memory[-3:]:  # Last 3 interactions
+            if item["type"] == "execution":
+                context += f"Q: {item['question']}\nA: {item['trace'].final_answer}\n\n"
+        
+        return context
+
+# Usage example
+async def main():
+    # Initialize tools
+    tools = [
+        SearchTool(),
+        CalculatorTool()
+    ]
+    
+    # Create ReAct agent
+    agent = AdvancedReActAgent(
+        llm_client=your_llm_client,
+        tools=tools,
+        max_iterations=10,
+        verbose=True
+    )
+    
+    # Execute query
+    question = "What is the population of Tokyo and how does it compare to New York?"
+    trace = await agent.run_with_planning(question)
+    
+    # Print results
+    print(f"\nFinal Answer: {trace.final_answer}")
+    print(f"Execution Summary: {agent.get_trace_summary(trace)}")
+
+# Error handling and recovery
+class RobustReActAgent(AdvancedReActAgent):
+    """ReAct agent with enhanced error handling and recovery"""
+    
+    async def run(self, question: str) -> ReActTrace:
+        """Execute ReAct with error recovery"""
+        max_retries = 3
+        
+        for attempt in range(max_retries):
+            try:
+                trace = await super().run(question)
+                
+                # Validate the trace
+                if self._validate_trace(trace):
+                    return trace
+                else:
+                    if attempt < max_retries - 1:
+                        if self.verbose:
+                            print(f"Trace validation failed, retrying... (attempt {attempt + 1})")
+                        continue
+                    else:
+                        trace.final_answer = "Unable to generate a valid solution"
+                        return trace
+                        
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    if self.verbose:
+                        print(f"Error occurred: {e}, retrying... (attempt {attempt + 1})")
+                    continue
+                else:
+                    # Return error trace
+                    error_trace = ReActTrace(
+                        steps=[ReActStep("error", f"Execution failed: {str(e)}")],
+                        final_answer="Error occurred during execution",
+                        success=False
+                    )
+                    return error_trace
+    
+    def _validate_trace(self, trace: ReActTrace) -> bool:
+        """Validate the quality of a ReAct trace"""
+        if not trace.success or not trace.final_answer:
+            return False
+        
+        # Check for reasonable number of steps
+        if len(trace.steps) < 2:
+            return False
+        
+        # Check for balanced reasoning and action
+        thoughts = len([s for s in trace.steps if s.step_type == "thought"])
+        actions = len([s for s in trace.steps if s.step_type == "action"])
+        
+        if thoughts == 0 or actions == 0:
+            return False
+        
+        return True
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
+</code></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="comparison-section">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">ReAct vs Traditional Approaches</h3>
+            
+            <div class="comparison-grid">
+                <div class="approach-card react-approach">
+                    <div class="approach-title">
+                        <div class="approach-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        ReAct Approach
+                    </div>
+                    <ul class="approach-features">
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Interleaved reasoning and acting
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Explicit thought traces
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Dynamic tool selection
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Self-correcting behavior
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Transparent decision making
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Reduced hallucinations
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Better error recovery
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="approach-card traditional-approach">
+                    <div class="approach-title">
+                        <div class="approach-icon">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        Traditional Approach
+                    </div>
+                    <ul class="approach-features">
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Sequential processing
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Hidden reasoning process
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Predefined tool usage
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Limited adaptability
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Black box decisions
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Higher hallucination risk
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-bullet"></div>
+                            Difficult debugging
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="advanced-patterns">
+            <h3 class="text-xl font-bold mb-2">Advanced ReAct Patterns</h3>
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-title">
+                        <i class="fas fa-layer-group pattern-icon"></i>
+                        Multi-Step Planning
+                    </div>
+                    <div class="pattern-desc">
+                        Break complex tasks into smaller, manageable steps with intermediate validation.
+                    </div>
+                    <div class="pattern-example">
+plan = create_plan(goal)
+for step in plan:
+    result = react_execute(step)
+    validate_and_adjust(result)</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-title">
+                        <i class="fas fa-redo pattern-icon"></i>
+                        Self-Correction
+                    </div>
+                    <div class="pattern-desc">
+                        Monitor execution results and automatically retry or adjust approach when errors occur.
+                    </div>
+                    <div class="pattern-example">
+if not validate_result(observation):
+    thought = "Previous action failed"
+    action = find_alternative_action()
+    retry_execution()</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-title">
+                        <i class="fas fa-memory pattern-icon"></i>
+                        Memory Integration
+                    </div>
+                    <div class="pattern-desc">
+                        Incorporate previous experiences and learned patterns into current reasoning process.
+                    </div>
+                    <div class="pattern-example">
+context = retrieve_similar_cases()
+thought = reason_with_context(
+    current_situation, context
+)
+action = select_proven_action()</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
